@@ -1,7 +1,7 @@
 #
 # Make web page from photos and album config
 #
-PORT := 8080
+PORT := 8200
 WEB := /tmp/pweb
 ASSETS := ${WEB}/pweb
 GOROOT := $(shell go env GOROOT)

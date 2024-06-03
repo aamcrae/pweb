@@ -9,14 +9,18 @@ import (
 )
 
 type Window struct {
-	document, head, body js.Value
+	window, document, head, body js.Value
+	resizeJS js.Func
+	Width, Height int
 }
 
 func GetWindow() *Window {
 	w := &Window{}
-	w.document = js.Global().Get("document")
+	w.window = js.Global()
+	w.document = w.window.Get("document")
 	w.head = w.document.Get("head")
 	w.body = w.document.Get("body")
+	w.refreshSize()
 	return w
 }
 
@@ -39,6 +43,25 @@ func (w *Window) LoadStyle(s string) {
 func (w *Window) SetTitle(title string) *Window {
 	w.document.Set("title", title)
 	return w
+}
+
+func (w *Window) OnResize(f func(w, h int)) {
+	w.resizeJS = js.FuncOf(func(this js.Value, args []js.Value) any {
+		w.refreshSize()
+		f(w.Width, w.Height)
+		return nil
+	})
+	w.window.Call("addEventListener", "resize", w.resizeJS)
+}
+
+func (w *Window) refreshSize() {
+	w.Width = js.ValueOf(w.window.Get("innerWidth")).Int()
+	w.Height = js.ValueOf(w.window.Get("innerHeight")).Int()
+}
+
+func (w *Window) Wait() {
+	var c chan struct{}
+	<- c
 }
 
 // Retrieve file from server

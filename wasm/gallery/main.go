@@ -19,6 +19,7 @@ func main() {
 		w.Display(p)
 		return
 	}
+	w.OnResize(resized)
 	var gallery data.Gallery
 	err = xml.Unmarshal(aXml, &gallery)
 	if err != nil {
@@ -27,8 +28,9 @@ func main() {
 		return
 	}
 	displayGallery(&gallery, w, p)
+	w.Wait()
 }
 
-func addCopyright(p *wasm.Page) {
-	p.Wr("<div id=\"copyright\">&nbsp; &copy; Copyright Andrew McRae</div>")
+func resized(w, h int) {
+	fmt.Printf("Resize callback, w = %d, h = %d\n", w, h)
 }
