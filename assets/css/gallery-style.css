@@ -1,0 +1,210 @@
+/*settings for full page*/
+body {             
+	background-color: #444444;
+	color:white;
+	font-family: helvetica, arial, sans;
+	font-size:77%;
+	text-align:center;
+        margin-top:0px;
+}
+
+/*style for all links*/
+A {
+	color:#969696;
+}
+
+/*style for all hovered links*/
+A:hover {
+	color:white;
+}
+
+/*style for all visited links*/
+A:visited {
+	color:#969696;
+}
+
+/*page heading (gallery name, or image name)*/
+h1 {               
+	text-align: center;
+	font-size: 300%;
+	clear:both;
+	padding-top:3px;
+}
+
+/*"1 of 10 images"*/
+#counter {         
+	float:left;
+}
+
+/*slide that each thumbnail lives in*/
+.holder {          
+	display: table; overflow: hidden;
+	float:left;
+	margin:2px;
+	background-color:#606060;
+}
+
+/*title under thumbnails*/
+.thumbName {
+	overflow:hidden;
+	margin-top:2px;
+	color:#dddddd;
+}
+
+/*non-selected thumbnail*/
+.slideshow {
+	display: table-cell; vertical-align: middle;
+}
+
+/*selected thumbnail*/
+.slideshowon {     
+	display: table-cell; vertical-align: middle;
+	background-color: #909090;
+}
+
+/*border around thumbnail image*/
+.slideshow img, .slideshowon img {    
+	border:1px solid #606060;
+}
+
+/*border around thumbnail image, when hovering*/
+.slideshow img:hover, .slideshowon img:hover {   
+	border:1px solid blue;
+}
+
+/*page navigation links at the bottom of the index page*/
+/*columns and grid styles only*/
+#navlinks {        
+	width: 99%;
+	margin:10px 0 0 2px;
+	padding:1px 0;
+	text-align:left;
+	background-color: #606060;
+}
+
+/*links to non-current page*/ 
+/*columns and grid styles only*/
+#navlinks a {      
+	padding:0px 15px;
+	font-size: 110%;
+	color:white;
+	background-color: #606060;
+}
+
+/*link for current page*/
+/*columns and grid styles only*/
+#navlinks a.current {      
+	text-decoration:none;
+	cursor:default;
+	background-color: #909090;
+}
+
+/*hover over page links*/
+/*columns and grid styles only*/
+#navlinks a:hover {
+	background-color:white;
+	color:black;
+}
+#navlinks a.current:hover {
+	background-color:#606060;
+	color:white;
+}
+
+
+/*preview image holder*/
+#imageholder {     
+	padding: 10px;
+	background-color: #606060;
+	border: 1px solid #404040;
+	color:white;
+}
+
+/*title of image under preview*/
+#desc {
+	width:80%;
+	margin: 10px auto;
+}
+
+/*preview image*/
+#linkholder img {  
+	border:0px;
+}
+
+/*only applies to Style 2 Gallery*/
+#thumbnails {      
+	margin-top:50px;
+	width:100%;
+	overflow:scroll;
+	overflow-x:scroll;
+	overflow-y:hidden;
+}
+
+/*box around image properties, full image page*/
+div.properties {
+	width: 470px;
+	margin: 20px auto;
+	border: 1px dotted white;
+}
+
+/*table of image properties, full image page*/
+div.properties TABLE {
+	margin: 0 auto;
+}
+
+/*exif name, full image page*/
+.exifname {
+	font-size: small;
+	font-weight: bold;
+	color: #969696;
+	text-align:right;
+	padding: 0 3px;
+}
+
+/*exif value, full image page*/
+.exifdata {
+	font-size: small;
+	color: white;
+	text-align:left;
+	padding: 0 3px;
+}
+
+/*exif download, full image page*/
+.exiflink {
+	font-size: small;
+	font-weight: bold;
+	color: white;
+	text-align:center;
+	padding: 0 3px;
+}
+
+/*image caption, full image page*/
+#caption {
+	font-size: large;
+	text-align:center;
+	margin-bottom:20px;
+}
+
+/*link to previous image, full image page*/
+#prev {
+	float:left;width:33%;text-align:left;
+}
+
+/*link to next image, full image page*/
+#next {
+	float:left;width:33%;text-align:right;
+}
+
+/*link to index, full image page*/
+#home {float:left;width:33%;
+}
+
+#copyright {
+	float:left;
+	border:0;
+}
+
+#built-by-front { 
+	vertical-align:middle;
+	border:0;
+	padding-left:10px;
+}

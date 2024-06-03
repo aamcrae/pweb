@@ -1,0 +1,5 @@
+up: ../index.html
+title: Flowers
+dir: flowers
+download:
+include: *.jpg

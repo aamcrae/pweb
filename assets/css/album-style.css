@@ -1,0 +1,58 @@
+/*settings for full page*/
+body {             
+	background-color: #666666;
+	color:white;
+	font-family: helvetica, arial, sans;
+	font-size:77%;
+	text-align:center;
+        margin-top:0px;
+}
+
+/*style for all links*/
+A {
+	color:#969696;
+}
+
+/*style for all hovered links*/
+A:hover {
+	color:white;
+}
+
+/*style for all visited links*/
+A:visited {
+	color:#969696;
+}
+
+/*page heading (gallery name, or image name)*/
+h1 {               
+	text-align: center;
+	font-size: 300%;
+	clear:both;
+	padding-top:3px;
+}
+
+.albumName {
+	text-align: center;
+	font-size: 250%;
+}
+
+.albumName a {
+	color:white;
+  text-decoration: none;
+}
+
+.albumName a:hover {
+	color:blue;
+}
+
+#albumTab {        
+	width: 80%;
+	margin: 20px auto;
+	border: 1px solid white;
+	background-color: #444444;
+}
+
+#copyright {
+	float:left;
+	border:0;
+}
