@@ -28,8 +28,8 @@ func (w *Window) GetById(id string) js.Value {
 	return w.document.Call("getElementById", id)
 }
 
-func (w *Window) Display(p *Page) {
-	w.body.Set("innerHTML", p.String())
+func (w *Window) Display(c *Comp) {
+	w.body.Set("innerHTML", c.String())
 }
 
 func (w *Window) LoadStyle(s string) {
