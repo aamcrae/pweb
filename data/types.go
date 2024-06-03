@@ -17,20 +17,20 @@ type Album struct {
 }
 
 type AlbumPage struct {
-	XMLName xml.Name `xml:"albumpage"`
-	Title   string   `xml:"title,omitempty"`
-	Back	string   `xml:"back,omitempty"`
-	Copyright     string   `xml:"copyright,omitempty"`
-	Albums  []Album  `xml:"album"`
+	XMLName   xml.Name `xml:"albumpage"`
+	Title     string   `xml:"title,omitempty"`
+	Back      string   `xml:"back,omitempty"`
+	Copyright string   `xml:"copyright,omitempty"`
+	Albums    []Album  `xml:"album"`
 }
 
 type Gallery struct {
-	XMLName  xml.Name `xml:"gallery"`
-	Title    string   `xml:"title,omitempty"`
-	Back     string   `xml:"back,omitempty"`
-	Copyright     string   `xml:"copyright,omitempty"`
-	Download string   `xml:"download,omitempty"`
-	Photos   []Photo  `xml:"photo"`
+	XMLName   xml.Name `xml:"gallery"`
+	Title     string   `xml:"title,omitempty"`
+	Back      string   `xml:"back,omitempty"`
+	Copyright string   `xml:"copyright,omitempty"`
+	Download  string   `xml:"download,omitempty"`
+	Photos    []Photo  `xml:"photo"`
 }
 
 type Photo struct {

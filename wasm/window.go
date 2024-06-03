@@ -36,7 +36,7 @@ func (w *Window) LoadStyle(s string) {
 	w.head.Call("appendChild", link)
 }
 
-func (w *Window) SetTitle(title string) * Window {
+func (w *Window) SetTitle(title string) *Window {
 	w.document.Set("title", title)
 	return w
 }
