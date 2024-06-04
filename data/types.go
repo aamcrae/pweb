@@ -16,6 +16,11 @@ type Album struct {
 	Id      string   `xml:"id,omitempty"`
 }
 
+type Size struct {
+	Width  int `xml:"width"`
+	Height int `xml:"height"`
+}
+
 type AlbumPage struct {
 	XMLName   xml.Name `xml:"albumpage"`
 	Title     string   `xml:"title,omitempty"`
@@ -30,6 +35,9 @@ type Gallery struct {
 	Back      string   `xml:"back,omitempty"`
 	Copyright string   `xml:"copyright,omitempty"`
 	Download  string   `xml:"download,omitempty"`
+	Thumb     Size     `xml:"thumb"`
+	Preview   Size     `xml:"preview"`
+	Image     Size     `xml:"image"`
 	Photos    []Photo  `xml:"photo"`
 }
 

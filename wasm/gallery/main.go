@@ -9,25 +9,30 @@ import (
 )
 
 type Image struct {
-	base    string
-	title string
-	date string
+	base       string
+	title      string
+	date       string
+	thumbEntry string
 }
 
 type Gallery struct {
-	w *wasm.Window
-	title string
-	header string
-	imagePage bool
-	curPage int
-	curImage int
-	owner string
-	images []*Image
+	w          *wasm.Window
+	title      string
+	header     string
+	imagePage  bool
+	curPage    int
+	curImage   int
+	owner      string
+	th, tw     int
+	pw, ph     int
+	iw, ih     int
+	rows, cols int
+	images     []*Image
 }
 
 func main() {
 	w := wasm.GetWindow()
-	w.LoadStyle("gallery-style.css")
+	w.LoadStyle("/pweb/gallery-style.css")
 	gXml, err := wasm.GetContent(data.GalleryFile)
 	if err != nil {
 		var c wasm.Comp
@@ -36,7 +41,6 @@ func main() {
 		w.Display(&c)
 		return
 	}
-	w.OnResize(resized)
 	var gallery data.Gallery
 	err = xml.Unmarshal(gXml, &gallery)
 	if err != nil {
@@ -47,16 +51,21 @@ func main() {
 		return
 	}
 	g := newGallery(&gallery, w)
+	w.OnResize(g.Resize)
 	g.Display()
 	w.Wait()
 }
 
-func resized(w, h int) {
-	fmt.Printf("Resize callback, w = %d, h = %d\n", w, h)
-}
-
 func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
-	g := &Gallery{w: w, owner: xmlData.Copyright}
+	g := &Gallery{w: w,
+		owner: xmlData.Copyright,
+		tw:    xmlData.Thumb.Width,
+		th:    xmlData.Thumb.Height,
+		pw:    xmlData.Preview.Width,
+		ph:    xmlData.Preview.Height,
+		iw:    xmlData.Image.Width,
+		ih:    xmlData.Image.Height,
+	}
 	if len(xmlData.Title) > 0 {
 		var c wasm.Comp
 		g.title = xmlData.Title
@@ -67,26 +76,55 @@ func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
 		}
 		g.header = c.String()
 	}
-	for _, entry := range xmlData.Photos {
-		g.images = append(g.images, &Image{base: entry.Name, title: entry.Title, date: entry.Date})
+	for i, entry := range xmlData.Photos {
+		img := &Image{base: entry.Name, title: entry.Title, date: entry.Date}
+		var ct wasm.Comp
+		ct.Wr(fmt.Sprintf("<div class=\"holder\"><div id=\"slide%d\" class=\"slideshow\">", i))
+		ct.Wr(fmt.Sprintf("<a onclick=\"return showPic(%d)\" href=\"h/%s\" target=\"_top\">", i, img.base))
+		ct.Wr("<img src=\"t/").Wr(img.base).Wr("\" title=\"").Wr(img.title).Wr("\">")
+		ct.Wr("</a>")
+		if len(img.title) > 0 {
+			ct.Wr("<div class=thumbName>").Wr(img.title).Wr("</div>")
+		}
+		ct.Wr("</div> </div>")
+		img.thumbEntry = ct.String()
+		g.images = append(g.images, img)
 	}
 	return g
+}
+
+func (g *Gallery) Resize() {
+	rows, cols := g.tableSize()
+	if rows != g.rows || cols != g.cols {
+		fmt.Printf("Resize callback, cols = %d, rows = %d\n", cols, rows)
+		g.Display()
+	}
 }
 
 func (g *Gallery) Display() {
 	var c wasm.Comp
 	g.w.SetTitle(g.title)
 	c.Wr(g.header)
+	g.rows, g.cols = g.tableSize()
 	c.Wr("<table>")
-	c.Wr("<tr><th>Name</th><th>Title</th><th>Date</th></tr>")
-	for _, entry := range g.images {
+	i := 0
+	for y := 0; y < g.cols; y++ {
 		c.Wr("<tr>")
-		c.Wr("<td>").Wr(entry.base).Wr("</td>")
-		c.Wr("<td>").Wr(entry.title).Wr("</td>")
-		c.Wr("<td>").Wr(entry.date).Wr("</td>")
+		for x := 0; x < g.rows; x++ {
+			c.Wr("<td>")
+			if i < len(g.images) {
+				c.Wr(g.images[i].thumbEntry)
+				i++
+			}
+			c.Wr("</td>")
+		}
 		c.Wr("</tr>")
 	}
 	c.Wr("</table>")
 	c.Copyright(g.owner)
 	g.w.Display(&c)
+}
+
+func (g *Gallery) tableSize() (int, int) {
+	return g.w.Width / (g.tw + 33), (g.w.Height - 200) / (g.th + 33)
 }

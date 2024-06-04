@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"log"
 	"os"
@@ -55,10 +56,11 @@ func (d *disImage) Write(destFile string, mtime time.Time, w, h, q int) {
 	if xr < 1 || yr < 1 {
 		// Image is larger than requested size, so scale it down
 		if xr < yr {
-			img = imaging.Resize(d.img, 0, h, imaging.Lanczos)
+			img = imaging.Resize(d.img, w, 0, imaging.Lanczos)
 		} else {
-			img = imaging.Resize(d.img, w, 0, imaging.CatmullRom)
+			img = imaging.Resize(d.img, 0, h, imaging.Lanczos)
 		}
+		fmt.Printf("Resize %d x %d to %d, %d, result %d x %d\n", d.Width(), d.Height(), w, h, img.Bounds().Max.X, img.Bounds().Max.Y)
 	} else {
 		img = d.img
 	}

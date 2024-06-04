@@ -10,8 +10,8 @@ import (
 
 type Window struct {
 	window, document, head, body js.Value
-	resizeJS js.Func
-	Width, Height int
+	resizeJS                     js.Func
+	Width, Height                int
 }
 
 func GetWindow() *Window {
@@ -36,7 +36,7 @@ func (w *Window) LoadStyle(s string) {
 	link := w.document.Call("createElement", "link")
 	link.Set("type", "text/css")
 	link.Set("rel", "stylesheet")
-	link.Set("href", "/pweb/"+s)
+	link.Set("href", s)
 	w.head.Call("appendChild", link)
 }
 
@@ -45,10 +45,10 @@ func (w *Window) SetTitle(title string) *Window {
 	return w
 }
 
-func (w *Window) OnResize(f func(w, h int)) {
+func (w *Window) OnResize(f func()) {
 	w.resizeJS = js.FuncOf(func(this js.Value, args []js.Value) any {
 		w.refreshSize()
-		f(w.Width, w.Height)
+		f()
 		return nil
 	})
 	w.window.Call("addEventListener", "resize", w.resizeJS)
@@ -61,7 +61,7 @@ func (w *Window) refreshSize() {
 
 func (w *Window) Wait() {
 	var c chan struct{}
-	<- c
+	<-c
 }
 
 // Retrieve file from server

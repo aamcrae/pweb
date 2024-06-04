@@ -16,6 +16,16 @@ import (
 	"github.com/aamcrae/pweb/data"
 )
 
+const (
+	thumbWidth    = 160
+	thumbHeight   = 160
+	previewWidth  = 320
+	previewHeight = 240
+)
+
+var imageWidth int = 1500
+var imageHeight int = 1200
+
 const configDefault = ".web"
 
 var verbose = flag.Bool("verbose", false, "Verbose output")
@@ -146,6 +156,10 @@ func main() {
 		// Remove any images no longer wanted
 		removeUnwanted(destDir, picts)
 	}
+	if _, ok := conf[C_LARGE]; ok {
+		imageWidth = 1800
+		imageHeight = 1500
+	}
 	title, _ := conf[C_TITLE]
 	up, upConfigured := conf[C_UP]
 	_, reverse := conf[C_REVERSE]
@@ -164,6 +178,12 @@ func main() {
 	if upConfigured {
 		g.Back = up[0]
 	}
+	g.Thumb.Width = thumbWidth
+	g.Thumb.Height = thumbHeight
+	g.Preview.Width = previewWidth
+	g.Preview.Height = previewHeight
+	g.Image.Width = imageWidth
+	g.Image.Height = imageHeight
 	for _, p := range picts {
 		p.AddToGallery(&g, download)
 	}
@@ -299,7 +319,7 @@ func resizePhotos(handler NewImage, picts []*Pict, download bool) {
 	defer resizers.Wait()
 	for _, p := range picts {
 		resizers.Run(func() {
-			p.Resize(handler, 160, 160, 320, 240, 1500, 1200)
+			p.Resize(handler, thumbWidth, thumbHeight, previewWidth, previewHeight, imageWidth, imageHeight)
 			if download {
 				// create symlink in the download directory to the original file, if not already existing
 				dlPath := path.Join(p.destDir, p.dlFile)

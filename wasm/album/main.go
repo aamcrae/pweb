@@ -10,7 +10,7 @@ import (
 
 func main() {
 	w := wasm.GetWindow()
-	w.LoadStyle("album-style.css")
+	w.LoadStyle("/pweb/album-style.css")
 	var c wasm.Comp
 	defer w.Display(&c)
 	aXml, err := wasm.GetContent(data.AlbumFile)
