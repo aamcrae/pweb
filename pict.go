@@ -18,8 +18,9 @@ type Pict struct {
 	previewFile string // Preview filename relative to destDir
 	destFile    string // Image filename relative to destDir
 
-	mtime time.Time // File modified time
-	exif  *Exif     // Lazily loaded Exif data
+	mtime         time.Time // File modified time
+	exif          *Exif     // Lazily loaded Exif data
+	width, height int
 }
 
 func NewPict(fname, srcDir, destDir string) (*Pict, error) {
@@ -68,6 +69,8 @@ func (p *Pict) AddToGallery(g *data.Gallery, download bool) {
 	exif := p.GetExif()
 	ph.Name = p.destFile
 	ph.Date = exif.ts.Format("03:04 PM Monday, 02 January 2006")
+	ph.Original.Width = p.width
+	ph.Original.Height = p.height
 	ph.Title = exif.title
 	ph.Caption = exif.caption
 	ph.ISO = exif.iso
@@ -83,6 +86,15 @@ func (p *Pict) AddToGallery(g *data.Gallery, download bool) {
 // a web page size. A resizer function is provided to perform the action
 // to allow selection of different image processors.
 func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) {
+	img, err := handler(p.srcFile)
+	if err != nil {
+		log.Fatalf("%s: %v", p.srcFile, err)
+	}
+	if *verbose {
+		fmt.Printf("Resizing %s from %d x %d\n", p.srcFile, img.Width(), img.Height())
+	}
+	p.width = img.Width()
+	p.height = img.Height()
 	// Check whether timestamp is the same
 	destPath := path.Join(p.destDir, p.destFile)
 	mt, _ := getMtime(destPath)
@@ -91,13 +103,6 @@ func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) {
 			fmt.Printf("Skipping resize of %s\n", p.destFile)
 		}
 		return
-	}
-	img, err := handler(p.srcFile)
-	if err != nil {
-		log.Fatalf("%s: %v", p.srcFile, err)
-	}
-	if *verbose {
-		fmt.Printf("Resizing %s from %d x %d\n", p.srcFile, img.Height(), img.Width())
 	}
 	switch p.GetExif().orientation {
 	case "8":

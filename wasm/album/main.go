@@ -12,7 +12,9 @@ func main() {
 	w := wasm.GetWindow()
 	w.LoadStyle("/pweb/album-style.css")
 	var c wasm.Comp
-	defer w.Display(&c)
+	defer func() {
+		w.Display(c.String())
+	}()
 	aXml, err := wasm.GetContent(data.AlbumFile)
 	if err != nil {
 		w.SetTitle("No album")

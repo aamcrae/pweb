@@ -44,6 +44,7 @@ type Gallery struct {
 type Photo struct {
 	XMLName     xml.Name `xml:"photo"`
 	Name        string   `xml:"name"`
+	Original    Size     `xml:"original"`
 	Title       string   `xml:"title,omitempty"`
 	Caption     string   `xml:"caption,omitempty"`
 	Date        string   `xml:"date,omitempty"`

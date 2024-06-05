@@ -103,15 +103,15 @@ func main() {
 	// ratings)
 	ratingMap := make(map[string]struct{})
 	ratings, useRating := conf[C_RATING]
-	sel, useSelect := conf[C_RATING]
+	sel, useSelect := conf[C_SELECT]
 	if useRating && useSelect {
 		log.Fatalf("Cannot use both select and rating")
 	}
 	if useRating {
-		buildRatings(ratings, ratingMap, false)
+		buildRatings(ratings, ratingMap, true)
 	}
 	if useSelect {
-		buildRatings(sel, ratingMap, true)
+		buildRatings(sel, ratingMap, false)
 	}
 	// Build map of captions
 	capt := make(map[string]string)
@@ -168,6 +168,16 @@ func main() {
 	}
 	_, download := conf[C_DOWNLOAD]
 	_, nozip := conf[C_NOZIP]
+	// Ensure base page, thumbnail, preview and (optionally) download directories exist.
+	makeDirs(destDir, path.Join(destDir, "t"), path.Join(destDir, "p"))
+	if download {
+		dlDir := path.Join(destDir, "d")
+		makeDirs(dlDir)
+		// If there is a .htaccess file required, copy it.
+		if err := cpMaybe(path.Join(*assets, "download-htaccess"), path.Join(dlDir, ".htaccess")); err != nil {
+			log.Fatalf("Write htaccess %v", err)
+		}
+	}
 	var g data.Gallery
 	// Preload gallery XML from template (to set copyright etc.)
 	ReadXml(path.Join(*assets, data.TemplateGalleryFile), &g)
@@ -184,18 +194,23 @@ func main() {
 	g.Preview.Height = previewHeight
 	g.Image.Width = imageWidth
 	g.Image.Height = imageHeight
+	var imgHandler NewImage
+	switch *imager {
+	case "vips":
+		imgHandler = NewVipsImage
+		vipsInit()
+	case "dis":
+		imgHandler = NewDisImage
+	default:
+		log.Fatalf("%s: Unknown imager", *imager)
+	}
+	// Now generate the scaled images that will appear on the web site.
+	resizePhotos(imgHandler, picts, download)
+	// Add the images to the gallery - this is done after the
+	// resize in order to capture the original resolution dimensions, which is
+	// only know after the image is processed.
 	for _, p := range picts {
 		p.AddToGallery(&g, download)
-	}
-	// Ensure base page, thumbnail, preview and (optionally) download directories exist.
-	makeDirs(destDir, path.Join(destDir, "t"), path.Join(destDir, "p"))
-	if download {
-		dlDir := path.Join(destDir, "d")
-		makeDirs(dlDir)
-		// If there is a .htaccess file required, copy it.
-		if err := cpMaybe(path.Join(*assets, "download-htaccess"), path.Join(dlDir, ".htaccess")); err != nil {
-			log.Fatalf("Write htaccess %v", err)
-		}
 	}
 	// Write the gallery XML file
 	gFile := path.Join(destDir, data.GalleryFile)
@@ -206,19 +221,6 @@ func main() {
 			log.Fatalf("%s: Write %v", gFile, err)
 		}
 	}
-	var imgHandler NewImage
-	switch *imager {
-	case "vips":
-		imgHandler = NewVipsImage
-		vipsInit()
-	case "dis":
-		imgHandler = NewDisImage
-		vipsInit()
-	default:
-		log.Fatalf("%s: Unknown imager", *imager)
-	}
-	// Now generate the scaled images that will appear on the web site.
-	resizePhotos(imgHandler, picts, download)
 	if download && !nozip {
 		updateZip(path.Join(destDir, "d"))
 	}

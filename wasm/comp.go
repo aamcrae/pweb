@@ -2,6 +2,7 @@ package wasm
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	_ "syscall/js"
@@ -19,6 +20,8 @@ func (c *Comp) Wr(s any) *Comp {
 		c.Write([]byte(v.String()))
 	case []byte:
 		c.Write(v)
+	case int:
+		c.Write([]byte(strconv.FormatInt(int64(v), 10)))
 	default:
 		fmt.Println("Wr: Unknown type")
 	}

@@ -28,8 +28,8 @@ func (w *Window) GetById(id string) js.Value {
 	return w.document.Call("getElementById", id)
 }
 
-func (w *Window) Display(c *Comp) {
-	w.body.Set("innerHTML", c.String())
+func (w *Window) Display(s string) {
+	w.body.Set("innerHTML", s)
 }
 
 func (w *Window) LoadStyle(s string) {
@@ -52,6 +52,10 @@ func (w *Window) OnResize(f func()) {
 		return nil
 	})
 	w.window.Call("addEventListener", "resize", w.resizeJS)
+}
+
+func (w *Window) AddJSFunction(name string, f func(js.Value, []js.Value) any) {
+	w.window.Set(name, js.FuncOf(f))
 }
 
 func (w *Window) refreshSize() {
