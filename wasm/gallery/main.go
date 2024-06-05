@@ -11,12 +11,18 @@ import (
 )
 
 type Image struct {
-	base       string
+	name       string
+	filename   string
 	title      string
 	date       string
 	thumbEntry string
 	imagePage  string
+	download   string
 	original   data.Size
+	exposure   string
+	aperture   string
+	iso        string
+	flen       string
 }
 
 type Gallery struct {
@@ -24,7 +30,6 @@ type Gallery struct {
 	title      string
 	header     string
 	imagePage  bool
-	curPage    int
 	curImage   int
 	owner      string
 	th, tw     int
@@ -77,18 +82,27 @@ func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
 		var c wasm.Comp
 		g.title = xmlData.Title
 		if len(xmlData.Back) > 0 {
-			c.Wr("<a href=\"").Wr(xmlData.Back).Wr("\"<h1>").Wr(g.title).Wr("</h1></a>")
+			c.Wr("<a href=\"").Wr(xmlData.Back).Wr("\"><h1>").Wr(g.title).Wr("</h1></a>")
 		} else {
 			c.Wr("<h1>").Wr(g.title).Wr("</h1>")
 		}
 		g.header = c.String()
 	}
 	for i, entry := range xmlData.Photos {
-		img := &Image{base: entry.Name, title: entry.Title, date: entry.Date, original: entry.Original}
+		img := &Image{name: entry.Name,
+			filename: entry.Filename,
+			title:    entry.Title,
+			date:     entry.Date,
+			download: entry.Download,
+			original: entry.Original,
+			aperture: entry.Aperture,
+			exposure: entry.Exposure,
+			iso:      entry.ISO,
+			flen:     entry.FocalLength}
 		var ct wasm.Comp
 		ct.Wr(fmt.Sprintf("<div class=\"holder\"><div id=\"slide%d\" class=\"slideshow\">", i))
 		ct.Wr(fmt.Sprintf("<a onclick=\"return showPict(%d)\" href=\"#\">", i))
-		ct.Wr("<img src=\"t/").Wr(img.base).Wr("\" title=\"").Wr(img.title).Wr("\">")
+		ct.Wr("<img src=\"t/").Wr(img.filename).Wr("\" title=\"").Wr(img.title).Wr("\">")
 		ct.Wr("</a>")
 		if len(img.title) > 0 {
 			ct.Wr("<div class=thumbName>").Wr(img.title).Wr("</div>")
@@ -97,6 +111,11 @@ func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
 		img.thumbEntry = ct.String()
 		g.images = append(g.images, img)
 	}
+	// Install some style elements now that we know the thumbnail sizes
+	c := new(wasm.Comp)
+	c.Wr(".holder {width:").Wr(g.tw + 10).Wr("px;height:").Wr(g.th + 30).Wr("px}")
+	c.Wr(".thumbName{width:").Wr(g.tw + 10).Wr("px}")
+	g.w.AddStyle(c.String())
 	return g
 }
 
@@ -127,13 +146,22 @@ func (g *Gallery) ShowThumbs(this js.Value, p []js.Value) any {
 }
 
 func (g *Gallery) ShowPage() {
-	var c wasm.Comp
+	c := new(wasm.Comp)
 	g.w.SetTitle(g.title)
-	c.Wr(g.header)
 	g.rows, g.cols = g.tableSize()
-	pageNo := g.curImage / (g.rows * g.cols)
+	perPage := g.rows * g.cols
+	nPages := (len(g.images) + perPage - 1) / perPage
+	curPage := g.curImage / perPage
+	if nPages > 1 {
+		c.Wr("<div id=\"navlinks\">Pages: ")
+		for i := 0; i < nPages; i++ {
+			g.LinkToPage(c, fmt.Sprintf("%d", i+1), i, i*perPage)
+		}
+		c.Wr("</div>")
+	}
+	c.Wr(g.header)
 	c.Wr("<table>")
-	i := pageNo * g.rows * g.cols
+	i := curPage * g.rows * g.cols
 	for y := 0; y < g.cols; y++ {
 		c.Wr("<tr>")
 		for x := 0; x < g.rows; x++ {
@@ -151,6 +179,14 @@ func (g *Gallery) ShowPage() {
 	g.w.Display(c.String())
 }
 
+func (g *Gallery) LinkToPage(c *wasm.Comp, txt string, pageNo, index int) {
+	c.Wr("<a ")
+	if pageNo >= 0 {
+		c.Wr("id=\"navlink").Wr(pageNo).Wr("\" ")
+	}
+	c.Wr("onclick=\"return showThumbs(").Wr(index).Wr(")\" href=\"#\">").Wr(txt).Wr("</a>")
+}
+
 func (g *Gallery) BuildPict(index int) {
 	img := g.images[index]
 	c := new(wasm.Comp)
@@ -164,14 +200,22 @@ func (g *Gallery) BuildPict(index int) {
 		c.Wr(g.title)
 	}
 	c.Wr("</h1>")
-	c.Wr("<div id=\"mainimage\"><img src=\"").Wr(img.base).Wr("\" alt=\"").Wr(img.title).Wr("\"></div>")
+	c.Wr("<div id=\"mainimage\"><img src=\"").Wr(img.filename).Wr("\" alt=\"").Wr(img.title).Wr("\"></div>")
 	// Show image properties etc.
 	c.Wr("<div class=\"properties\"><table summary=\"image properties\" border=\"0\">")
 	g.Property(c, "Date", img.date)
-	g.Property(c, "Filename", img.base)
+	if img.download == "" {
+		g.Property(c, "Filename", img.name)
+	} else {
+		g.Property(c, "Filename", fmt.Sprintf("%s <a href=\"%s\" download>[Download original]</a>", img.name, img.download))
+	}
 	if img.original.Width != 0 && img.original.Height != 0 {
 		g.Property(c, "Original resolution", fmt.Sprintf("%d x %d", img.original.Width, img.original.Height))
 	}
+	g.Property(c, "Exposure", img.exposure)
+	g.Property(c, "Aperture", img.aperture)
+	g.Property(c, "ISO", img.iso)
+	g.Property(c, "Focal length", img.flen)
 	c.Wr("</table></div>")
 	c.Copyright(g.owner)
 	img.imagePage = c.String()
@@ -190,7 +234,7 @@ func (g *Gallery) LinkToPict(c *wasm.Comp, n string, index int) {
 	} else {
 		c.Wr("<a onclick=\"return showPict(").Wr(index).Wr(")\" href=\"#\">")
 		if len(g.images[index].title) == 0 {
-			c.Wr(g.images[index].base)
+			c.Wr(g.images[index].name)
 		} else {
 			c.Wr(g.images[index].title)
 		}

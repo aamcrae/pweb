@@ -17,6 +17,7 @@ type Pict struct {
 	dlFile      string // Download filename relative to destDir
 	previewFile string // Preview filename relative to destDir
 	destFile    string // Image filename relative to destDir
+	baseName    string // Base filename
 
 	mtime         time.Time // File modified time
 	exif          *Exif     // Lazily loaded Exif data
@@ -29,6 +30,7 @@ func NewPict(fname, srcDir, destDir string) (*Pict, error) {
 		return nil, err
 	}
 	d, name := path.Split(fname)
+	baseName := name
 	for d != "" {
 		var f string
 		d = path.Dir(d)
@@ -44,6 +46,7 @@ func NewPict(fname, srcDir, destDir string) (*Pict, error) {
 		previewFile: path.Join("p", name),
 		destFile:    name,
 		mtime:       mtime,
+		baseName:    baseName,
 	}, nil
 }
 
@@ -67,12 +70,14 @@ func (p *Pict) GetExif() *Exif {
 func (p *Pict) AddToGallery(g *data.Gallery, download bool) {
 	var ph data.Photo
 	exif := p.GetExif()
-	ph.Name = p.destFile
+	ph.Name = p.baseName
+	ph.Filename = p.destFile
 	ph.Date = exif.ts.Format("03:04 PM Monday, 02 January 2006")
 	ph.Original.Width = p.width
 	ph.Original.Height = p.height
 	ph.Title = exif.title
 	ph.Caption = exif.caption
+	ph.Exposure = exif.exposure
 	ph.ISO = exif.iso
 	ph.Aperture = exif.fstop
 	ph.FocalLength = exif.focal_len

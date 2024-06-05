@@ -40,6 +40,13 @@ func (w *Window) LoadStyle(s string) {
 	w.head.Call("appendChild", link)
 }
 
+func (w *Window) AddStyle(s string) {
+	style := w.document.Call("createElement", "style")
+	textNode := w.document.Call("createTextNode", s)
+	style.Set("type", "text/css")
+	w.head.Call("appendChild", textNode)
+}
+
 func (w *Window) SetTitle(title string) *Window {
 	w.document.Set("title", title)
 	return w

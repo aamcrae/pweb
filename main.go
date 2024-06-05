@@ -33,6 +33,7 @@ var force = flag.Bool("force", false, "Force rebuild")
 var baseDir = flag.String("base", "/var/www/html/nphotos", "Base directory of web pages")
 var assets = flag.String("assets", "/usr/share/pweb", "Source directory of web assets")
 var imager = flag.String("imager", "dis", "Select the image handler")
+var watchdog = flag.Int("watchdog", 20, "Timeout in seconds of watchdog")
 
 // rScaleMap maps a selected rating to photo ratings that will be accepted
 // e.g a rating of '3' will select photos with a rating of '3', '4' and '5'.
@@ -235,7 +236,7 @@ func main() {
 func readPicts(files []string, srcDir, destDir string, readExif bool) []*Pict {
 	// Create a worker pool to read the EXIF data
 	var unratedPicts []*Pict
-	pWork := NewWorker(time.Second * 5)
+	pWork := NewWorker(time.Second * time.Duration(*watchdog))
 	for _, f := range files {
 		p, err := NewPict(f, srcDir, destDir)
 		if err != nil {
@@ -317,7 +318,7 @@ func buildRatings(ratings []string, ratingMap map[string]struct{}, scale bool) {
 }
 
 func resizePhotos(handler NewImage, picts []*Pict, download bool) {
-	resizers := NewWorker(time.Second * 10)
+	resizers := NewWorker(time.Second * time.Duration(*watchdog))
 	defer resizers.Wait()
 	for _, p := range picts {
 		resizers.Run(func() {
