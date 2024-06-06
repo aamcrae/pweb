@@ -30,7 +30,7 @@ const configDefault = ".web"
 
 var verbose = flag.Bool("verbose", false, "Verbose output")
 var force = flag.Bool("force", false, "Force rebuild")
-var baseDir = flag.String("base", "/var/www/html/nphotos", "Base directory of web pages")
+var baseDir = flag.String("base", "/var/www/html/photos", "Base directory of web pages")
 var assets = flag.String("assets", "/usr/share/pweb", "Source directory of web assets")
 var imager = flag.String("imager", "dis", "Select the image handler")
 var watchdog = flag.Int("watchdog", 120, "Timeout in seconds of watchdog")
