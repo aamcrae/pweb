@@ -8,10 +8,12 @@ import (
 	_ "syscall/js"
 )
 
+// Comp is a simple composer that understands the JS values
 type Comp struct {
 	strings.Builder
 }
 
+// Wr writes the value to the string builder
 func (c *Comp) Wr(s any) *Comp {
 	switch v := s.(type) {
 	case string:
@@ -28,6 +30,7 @@ func (c *Comp) Wr(s any) *Comp {
 	return c
 }
 
+// Add a copyright string
 func (c *Comp) Copyright(owner string) *Comp {
 	if len(owner) > 0 {
 		c.Wr("<div id=\"copyright\">&nbsp; &copy; Copyright ").Wr(owner).Wr("</div>")

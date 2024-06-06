@@ -31,6 +31,7 @@ func main() {
 	displayAlbum(&album, w, &c)
 }
 
+// displayAlbum generates the HTML for the album from the XML data.
 func displayAlbum(a *data.AlbumPage, w *wasm.Window, c *wasm.Comp) {
 	if len(a.Title) > 0 {
 		w.SetTitle(a.Title)

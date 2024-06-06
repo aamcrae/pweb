@@ -10,33 +10,44 @@ import (
 	"github.com/aamcrae/pweb/wasm"
 )
 
+const (
+	thumbOn  = "slideshowon"
+	thumbOff = "slideshow"
+)
+
+/*
+ * Image holds the data for a single photo
+ */
 type Image struct {
-	name       string
-	filename   string
-	title      string
-	date       string
-	thumbEntry string
-	imagePage  string
-	download   string
-	original   data.Size
-	exposure   string
+	name       string    // Base filename (that may not be unique)
+	filename   string    // Unique filename that may include appended directory names
+	title      string    // Headline or title
+	date       string    // Date photo was taken
+	thumbEntry string    // The HTML used to display the thumbnail
+	imagePage  string    // The HTML used to display the full sized image
+	download   string    // If set, the file for download
+	original   data.Size // The original image's resolution
+	exposure   string    // EXIF data
 	aperture   string
 	iso        string
 	flen       string
 }
 
+// Gallery holds the collection of images that form a photo gallery
 type Gallery struct {
 	w          *wasm.Window
-	title      string
-	header     string
-	imagePage  bool
-	curImage   int
-	owner      string
-	th, tw     int
-	pw, ph     int
-	iw, ih     int
-	rows, cols int
-	images     []*Image
+	title      string   // Title of gallery
+	header     string   // HTML of title of page
+	imagePage  bool     // If set, displaying the full sized image, otherwise showing thumbnails
+	firstImage int      // The index of the first thumbnail displayed on the page
+	lastImage  int      // The index of the last thumbnail displayed on the page
+	curImage   int      // The current image
+	owner      string   // If set, display a copyright notice
+	th, tw     int      // Size of thumbnail image
+	pw, ph     int      // Size of preview image
+	iw, ih     int      // Size of full image
+	rows, cols int      // Number of thumbnail rows and columns being displayed
+	images     []*Image // slice of images in the gallery
 }
 
 func main() {
@@ -62,12 +73,15 @@ func main() {
 	g := newGallery(&gallery, w)
 	// Add some callbacks
 	w.OnResize(g.Resize)
+	w.OnKey(g.KeyPress)
+	w.OnSwipe(g.Swipe)
 	w.AddJSFunction("showPict", g.ShowPic)
 	w.AddJSFunction("showThumbs", g.ShowThumbs)
 	g.ShowPage()
 	w.Wait()
 }
 
+// newGallery creates a new gallery from the XML data provided.
 func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
 	g := &Gallery{w: w,
 		owner: xmlData.Copyright,
@@ -119,74 +133,180 @@ func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
 	return g
 }
 
+// Resize will redisplay the thumbnail page when the window is resized.
 func (g *Gallery) Resize() {
-	rows, cols := g.tableSize()
-	if rows != g.rows || cols != g.cols {
-		fmt.Printf("Resize callback, cols = %d, rows = %d\n", cols, rows)
+	if !g.imagePage {
+		cols, rows := g.tableSize()
+		if rows != g.rows || cols != g.cols {
+			g.ShowPage()
+		}
+	}
+}
+
+// Swipe handles a touch swipe action
+func (g *Gallery) Swipe(d wasm.Direction) {
+	if g.imagePage {
+		switch d {
+		case wasm.Down:
+			g.SelectThumb(g.curImage)
+		case wasm.Right:
+			g.ImageDisplay(g.curImage - 1)
+		case wasm.Left:
+			g.ImageDisplay(g.curImage + 1)
+		}
+	} else {
+		perPage := g.rows * g.cols
+		switch d {
+		case wasm.Right:
+			g.SelectThumb(g.curImage - perPage)
+		case wasm.Left:
+			g.SelectThumb(g.curImage + perPage)
+		}
+	}
+}
+
+// KeyPress handles keyboard shortcuts
+func (g *Gallery) KeyPress(key string) {
+	if g.imagePage {
+		// Image page
+		switch key {
+		case "Home":
+			g.ImageDisplay(0)
+		case "End":
+			g.ImageDisplay(len(g.images) - 1)
+		case "ArrowRight":
+			g.ImageDisplay(g.curImage + 1)
+		case "ArrowLeft":
+			g.ImageDisplay(g.curImage - 1)
+		case "ArrowUp":
+			g.SelectThumb(g.curImage)
+		}
+	} else {
+		// Thumbnail page
+		switch key {
+		case "Enter":
+			g.ImageDisplay(g.curImage)
+		case "Home":
+			g.SelectThumb(0)
+		case "End":
+			g.SelectThumb(len(g.images) - 1)
+		case "ArrowRight":
+			g.SelectThumb(g.curImage + 1)
+		case "ArrowLeft":
+			g.SelectThumb(g.curImage - 1)
+		case "ArrowUp":
+			g.SelectThumb(g.curImage - g.cols)
+		case "ArrowDown":
+			g.SelectThumb(g.curImage + g.cols)
+		}
+	}
+}
+
+// SelectThumb sets the current image and displays the thumbnail page
+func (g *Gallery) SelectThumb(index int) {
+	if index < 0 {
+		index = len(g.images) - 1
+	} else if index >= len(g.images) {
+		index = 0
+	}
+	if index == g.curImage && !g.imagePage {
+		return
+	}
+	index, g.curImage = g.curImage, index
+	// Check if same page.
+	if !g.imagePage && g.curImage >= g.firstImage && g.curImage <= g.lastImage {
+		g.updateThumb(index, thumbOff)
+		g.updateThumb(g.curImage, thumbOn)
+	} else {
 		g.ShowPage()
 	}
 }
 
+// ShowPic is a callback from a javascript onclick handler.
+// The full sized image is shown for this image.
 func (g *Gallery) ShowPic(this js.Value, p []js.Value) any {
-	g.curImage = p[0].Int()
-	fmt.Printf("Showing picture %d\n", p[0].Int())
-	img := g.images[g.curImage]
-	if len(img.imagePage) == 0 {
-		g.BuildPict(g.curImage)
-	}
-	g.w.Display(img.imagePage)
+	g.ImageDisplay(p[0].Int())
 	return js.ValueOf(false)
 }
 
+// ImageDisplay displays the full sized image, lazily building
+// the HTML page for this image as required.
+func (g *Gallery) ImageDisplay(index int) {
+	if index < 0 {
+		index = 0
+	} else if index >= len(g.images) {
+		index = len(g.images) - 1
+	}
+	if g.imagePage && index == g.curImage {
+		return
+	}
+	g.imagePage = true
+	g.curImage = index
+	img := g.images[index]
+	if len(img.imagePage) == 0 {
+		g.BuildPict(index)
+	}
+	g.w.Display(img.imagePage)
+}
+
+// ShowThumbs is a callback from a JS onclick event,
+// and will set the current image and show the thumbnail page.
 func (g *Gallery) ShowThumbs(this js.Value, p []js.Value) any {
-	fmt.Printf("Showing thumbnails\n")
 	g.curImage = p[0].Int()
 	g.ShowPage()
 	return js.ValueOf(false)
 }
 
+// ShowPage displays the thumbnail page of the current image.
 func (g *Gallery) ShowPage() {
+	g.imagePage = false
 	c := new(wasm.Comp)
 	g.w.SetTitle(g.title)
-	g.rows, g.cols = g.tableSize()
+	g.cols, g.rows = g.tableSize()
 	perPage := g.rows * g.cols
 	nPages := (len(g.images) + perPage - 1) / perPage
 	curPage := g.curImage / perPage
 	if nPages > 1 {
 		c.Wr("<div id=\"navlinks\">Pages: ")
 		for i := 0; i < nPages; i++ {
-			g.LinkToPage(c, fmt.Sprintf("%d", i+1), i, i*perPage)
+			class := ""
+			if curPage == i {
+				class = "current"
+			}
+			g.LinkToPage(c, fmt.Sprintf("%d", i+1), i, i*perPage, class)
 		}
 		c.Wr("</div>")
 	}
 	c.Wr(g.header)
-	c.Wr("<table>")
+	c.Wr("<div id=\"thumbpage\">")
 	i := curPage * g.rows * g.cols
-	for y := 0; y < g.cols; y++ {
-		c.Wr("<tr>")
-		for x := 0; x < g.rows; x++ {
-			c.Wr("<td>")
+	g.firstImage = i
+	for x := 0; x < g.rows; x++ {
+		for y := 0; y < g.cols; y++ {
 			if i < len(g.images) {
 				c.Wr(g.images[i].thumbEntry)
 				i++
 			}
-			c.Wr("</td>")
 		}
-		c.Wr("</tr>")
+		c.Wr("<br style=\"clear: left\" />\n")
 	}
-	c.Wr("</table>")
+	g.lastImage = i - 1
+	c.Wr("</div><br style=\"clear: both\" />\n")
 	c.Copyright(g.owner)
 	g.w.Display(c.String())
+	g.updateThumb(g.curImage, thumbOn)
 }
 
-func (g *Gallery) LinkToPage(c *wasm.Comp, txt string, pageNo, index int) {
-	c.Wr("<a ")
+// LinkToPage generates HTML for a link to a thumbnail page.
+func (g *Gallery) LinkToPage(c *wasm.Comp, txt string, pageNo, index int, class string) {
+	c.Wr("<a class=\"").Wr(class).Wr("\" ")
 	if pageNo >= 0 {
 		c.Wr("id=\"navlink").Wr(pageNo).Wr("\" ")
 	}
 	c.Wr("onclick=\"return showThumbs(").Wr(index).Wr(")\" href=\"#\">").Wr(txt).Wr("</a>")
 }
 
+// BuildPict creates the full page HTML for this image
 func (g *Gallery) BuildPict(index int) {
 	img := g.images[index]
 	c := new(wasm.Comp)
@@ -221,12 +341,14 @@ func (g *Gallery) BuildPict(index int) {
 	img.imagePage = c.String()
 }
 
+// Property generates HTML for the image metadata (name, size etc.)
 func (g *Gallery) Property(c *wasm.Comp, n, val string) {
 	if val != "" {
 		c.Wr("<tr><td class=\"exifname\">").Wr(n).Wr("</td><td class=\"exifdata\">").Wr(val).Wr("</td></tr>")
 	}
 }
 
+// LinkToPict generates HTML for a link to the selected picture.
 func (g *Gallery) LinkToPict(c *wasm.Comp, n string, index int) {
 	c.Wr("<div id=\"").Wr(n).Wr("\">")
 	if index < 0 || index == len(g.images) {
@@ -243,6 +365,19 @@ func (g *Gallery) LinkToPict(c *wasm.Comp, n string, index int) {
 	c.Wr("</div>")
 }
 
+// updateThumb sets the class for the selected image (used to
+// highlight the current image).
+func (g *Gallery) updateThumb(i int, cl string) {
+	id := fmt.Sprintf("slide%d", i)
+	current := g.w.GetById(id)
+	if current.IsUndefined() || current.IsNull() {
+		fmt.Printf("Can't find %s\n", id)
+	} else {
+		current.Set("className", js.ValueOf(cl))
+	}
+}
+
+// tableSize returns the column and row count for the thumbnail page.
 func (g *Gallery) tableSize() (int, int) {
-	return max(g.w.Width/(g.tw+33), 1), max((g.w.Height-200)/(g.th+33), 1)
+	return max(g.w.Width/(g.tw+14), 1), max((g.w.Height-170)/(g.th+33), 1)
 }
