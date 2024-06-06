@@ -19,16 +19,19 @@ A:hover {
 }
 
 /*style for all visited links*/
+/*
 A:visited {
 	color:#969696;
 }
+*/
 
 /*page heading (gallery name, or image name)*/
 h1 {               
 	text-align: center;
-	font-size: 300%;
+	font-size: 250%;
 	clear:both;
-	padding-top:3px;
+	padding-top:0px;
+	margin:5px 0 8px 0;
 }
 
 /*"1 of 10 images"*/
@@ -75,8 +78,9 @@ h1 {
 /*page navigation links at the bottom of the index page*/
 /*columns and grid styles only*/
 #navlinks {        
-	width: 99%;
-	margin:10px 0 0 2px;
+	font-size: 150%;
+	width: 100%;
+	margin:5px 0 0 2px;
 	padding:1px 0;
 	text-align:left;
 	background-color: #606060;
@@ -85,7 +89,7 @@ h1 {
 /*links to non-current page*/ 
 /*columns and grid styles only*/
 #navlinks a {      
-	padding:0px 15px;
+	padding:0px 10px;
 	font-size: 110%;
 	color:white;
 	background-color: #606060;
@@ -139,6 +143,12 @@ h1 {
 	overflow-y:hidden;
 }
 
+/* full page of thumbnails */
+#thumbpage {      
+	/*margin: 0 auto; */
+	/*width:95%; */
+}
+
 /*box around image properties, full image page*/
 div.properties {
 	width: 470px;
@@ -187,15 +197,18 @@ div.properties TABLE {
 /*link to previous image, full image page*/
 #prev {
 	float:left;width:33%;text-align:left;
+	font-size: 150%;
 }
 
 /*link to next image, full image page*/
 #next {
 	float:left;width:33%;text-align:right;
+	font-size: 150%;
 }
 
 /*link to index, full image page*/
 #home {float:left;width:33%;
+	font-size: 150%;
 }
 
 #copyright {
