@@ -33,7 +33,7 @@ var force = flag.Bool("force", false, "Force rebuild")
 var baseDir = flag.String("base", "/var/www/html/nphotos", "Base directory of web pages")
 var assets = flag.String("assets", "/usr/share/pweb", "Source directory of web assets")
 var imager = flag.String("imager", "dis", "Select the image handler")
-var watchdog = flag.Int("watchdog", 20, "Timeout in seconds of watchdog")
+var watchdog = flag.Int("watchdog", 120, "Timeout in seconds of watchdog")
 
 // rScaleMap maps a selected rating to photo ratings that will be accepted
 // e.g a rating of '3' will select photos with a rating of '3', '4' and '5'.
