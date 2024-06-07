@@ -14,10 +14,15 @@ run: all
 photos: dir
 	(cd photos; pweb --assets=../../assets --base=${WEB} web)
 
-assets: dir
-	(cd ../wasm; GOOS=js GOARCH=wasm go build -o ${ASSETS}/pweb.wasm)
+assets: dir go # tinygo
 	cp ../assets/css/*  ${ASSETS}
 	cp ${GOROOT}/misc/wasm/wasm_exec.js ${ASSETS}
+
+tinygo:
+	(cd ../wasm; tinygo build -o ${ASSETS}/pweb.wasm -target wasm)
+
+go:
+	(cd ../wasm; GOOS=js GOARCH=wasm go build -o ${ASSETS}/pweb.wasm)
 
 dir:
 	mkdir -p ${ASSETS}
