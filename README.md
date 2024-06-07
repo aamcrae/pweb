@@ -116,6 +116,10 @@ wildcarded (along with brace expansion). If no ```include``` config exists, a de
 - The ```after``` and ```before``` keywords allow wildcarded files to be added after or before a specific image resp. 
 - A ```rating``` and ```select``` directive allows filtering by XMP Rating values.
 
+The XMP rating is a useful method of filtering images, and is supported by most image processors.
+In the event that images are not being processed through a workflow (e.g raw conversion) that allows setting of
+a XMP rating or other metadata such as captions, there is a separate program called [ptag](https://github.com/aamcrae/ptag) that can be used to add a rating and a caption to an existing image.
+
 ## Config file
 
 The config file is a series of lines, with each line containing a keyword followed by a ':', and then optional
@@ -163,11 +167,24 @@ The directives are:
 There are some runtime flags that may be used to control ```pweb```. These can be displayed
 via ```pweb --help```. The main ones are:
 - ```--force```: Remove the gallery completely and rebuild it. This is useful when changing the thumbnail size etc.
-- ```base=/var/www/html/my-photos```: Used to set the web pages base directory.
-- ```assets=~/pweb/assets```: (Default /usr/share/pweb) Directory containing template web files such as the album and gallery ```index.html``` files etc. These can be locally customised.
+- ```--base=/var/www/html/my-photos```: Used to set the web pages base directory.
+- ```--assets=~/pweb/assets```: (Default /usr/share/pweb) Directory containing template web files such as the album and gallery ```index.html``` files etc. These can be locally customised.
 
 Other flags exist for various diagnostic functions.
 
 ## Initial installation
 
-The base directory for the
+To install ```pweb```:
+- Build and install the program via ```go build; sudo cp pweb /usr/local/bin```
+- Copy the asset files to an appropriate location e.g
+```
+cp assets/*.xml assets/*.html /usr/share/pweb
+cp assets/css/* /var/www/html/pweb
+```
+- Build and install the WASM support and binaries:
+```
+(cd wasm/album; GOOS=js GOARCH=wasm go build -o /var/www/html/pweb/album.wasm)
+(cd wasm/gallery; GOOS=js GOARCH=wasm go build -o /var/www/html/pweb/gallery.wasm)
+cp ${GOROOT}/misc/wasm/wasm_exec.js /var/www/html/pweb/gallery.wasm
+```
+- The album-template.xml and gallery-template.xml files may be customised to add a copyright owner.
