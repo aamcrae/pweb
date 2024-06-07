@@ -15,6 +15,8 @@ const (
 	thumbOff = "slideshow"
 )
 
+const hSpace = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+
 /*
  * Image holds the data for a single photo
  */
@@ -363,6 +365,9 @@ func (g *Gallery) LinkToPict(c *wasm.Comp, n string, index int) {
 func (g *Gallery) HeaderDownload(title, back, download string) string {
 	c := new(wasm.Comp)
 	c.Wr("<h1>")
+	if download != "" {
+		c.Wr(hSpace)
+	}
 	if back != "" {
 		c.Wr("<a href=\"").Wr(back).Wr("\">")
 	}
@@ -371,7 +376,7 @@ func (g *Gallery) HeaderDownload(title, back, download string) string {
 		c.Wr("</a>")
 	}
 	if download != "" {
-		c.Wr("<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"").Wr(download).Wr("\">").Wr(rune(0x21A7)).Wr("</a></span>")
+		c.Wr("<span>").Wr(hSpace).Wr("<a href=\"").Wr(download).Wr("\">").Wr(rune(0x21A7)).Wr("</a></span>")
 	}
 	c.Wr("</h1>")
 	return c.String()

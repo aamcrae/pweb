@@ -1,2 +1,2 @@
 # pweb
-Generator for web based photo albums
+pweb is a generator for web based photo albums.

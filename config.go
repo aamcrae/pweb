@@ -32,29 +32,30 @@ const (
 type configOptions struct {
 	code  int
 	min   int
+	max	  int
 	multi bool
 	count int
 }
 
 var configKeywords = map[string]*configOptions{
-	"up":        &configOptions{code: C_UP, min: 1},
-	"title":     &configOptions{code: C_TITLE, min: 1},
-	"dir":       &configOptions{code: C_DIR, min: 1},
+	"up":        &configOptions{code: C_UP, min: 1, max: 1},
+	"title":     &configOptions{code: C_TITLE, min: 1, max: 1},
+	"dir":       &configOptions{code: C_DIR, min: 1, max: 1},
 	"include":   &configOptions{code: C_INCLUDE, min: 1, multi: true},
 	"exclude":   &configOptions{code: C_EXCLUDE, min: 1, multi: true},
-	"style":     &configOptions{code: C_STYLE, min: 1},
+	"style":     &configOptions{code: C_STYLE, min: 1, max: 1},
 	"after":     &configOptions{code: C_AFTER, min: 2, multi: true},
 	"before":    &configOptions{code: C_BEFORE, min: 2, multi: true},
-	"rating":    &configOptions{code: C_RATING, min: 1},
-	"select":    &configOptions{code: C_SELECT, min: 1},
+	"rating":    &configOptions{code: C_RATING, min: 1, max: 1},
+	"select":    &configOptions{code: C_SELECT, min: 1, max: 6},
 	"download":  &configOptions{code: C_DOWNLOAD},
 	"nocaption": &configOptions{code: C_NOCAPTION},
-	"sort":      &configOptions{code: C_SORT, min: 1},
+	"sort":      &configOptions{code: C_SORT, min: 1, max: 1},
 	"reverse":   &configOptions{code: C_REVERSE},
 	"large":     &configOptions{code: C_LARGE},
 	"caption":   &configOptions{code: C_CAPTION, min: 2, multi: true},
 	"nozip":     &configOptions{code: C_NOZIP},
-	"thumb":     &configOptions{code: C_THUMB, min: 1},
+	"thumb":     &configOptions{code: C_THUMB, min: 1, max: 1},
 }
 
 type Config map[int][]string
@@ -85,6 +86,9 @@ func ReadConfig(f string) Config {
 			}
 			if len(strings.Fields(cmd[1])) < c.min {
 				log.Fatalf("%s: line %d, not enough arguments for '%s'", f, i, cmd[0])
+			}
+			if !c.multi && len(strings.Fields(cmd[1])) > c.max {
+				log.Fatalf("%s: line %d, too many arguments for '%s'", f, i, cmd[0])
 			}
 			trimmed := strings.TrimLeft(cmd[1], " ")
 			conf[c.code] = append(conf[c.code], trimmed)
