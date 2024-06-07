@@ -10,7 +10,7 @@ separate images can be selected, viewed, downloaded etc.
 
 EXIF tags and metadata is used to add titles, or selectively filter the list by rating etc.
 
-(My own photo web site)[http://amcrae.au/photos/index.html] is an example of an extensive web site
+[My own photo web site](http://amcrae.au/photos/index.html) is an example of an extensive web site
 built by pweb.
 ## Navigation
 Web pages built by pweb are simple to navigate. For albums, a list of sub-albums and galleries is presented,
