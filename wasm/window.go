@@ -27,6 +27,7 @@ type Window struct {
 	Width, Height                int
 	startX, startY               int
 	endX, endY                   int
+	multiTouch bool
 }
 
 // GetWindow creates a new Window ready to interface to the browser.
@@ -90,6 +91,8 @@ func (w *Window) OnSwipe(f func(Direction)) {
 		w.startY = t.Index(0).Get("clientY").Int()
 		w.endX = w.startX
 		w.endY = w.startY
+		// Ignore multi-touch gestures
+		w.multiTouch = t.Length() > 1
 		return nil
 	})
 	touchMoveJS := js.FuncOf(func(this js.Value, args []js.Value) any {
@@ -98,13 +101,18 @@ func (w *Window) OnSwipe(f func(Direction)) {
 			fmt.Printf("targetTouches is undefined\n")
 			return nil
 		}
-		if e.Length() > 0 {
+		if e.Length() == 1 {
 			w.endX = e.Index(0).Get("clientX").Int()
 			w.endY = e.Index(0).Get("clientY").Int()
+		} else {
+			w.multiTouch = true
 		}
 		return nil
 	})
 	touchEndJS := js.FuncOf(func(this js.Value, args []js.Value) any {
+		if w.multiTouch {
+			return nil
+		}
 		e := args[0]
 		x := w.startX - w.endX
 		y := w.startY - w.endY
