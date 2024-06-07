@@ -25,9 +25,10 @@ const (
 type Window struct {
 	window, document, head, body js.Value
 	Width, Height                int
-	startX, startY               int
-	endX, endY                   int
-	multiTouch bool
+	// touch values
+	startX, startY int
+	endX, endY     int
+	multiTouch     bool
 }
 
 // GetWindow creates a new Window ready to interface to the browser.

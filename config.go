@@ -32,7 +32,7 @@ const (
 type configOptions struct {
 	code  int
 	min   int
-	max	  int
+	max   int
 	multi bool
 	count int
 }
