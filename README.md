@@ -167,8 +167,8 @@ The directives are:
 There are some runtime flags that may be used to control ```pweb```. These can be displayed
 via ```pweb --help```. The main ones are:
 - ```--force```: Remove the gallery completely and rebuild it. This is useful when changing the thumbnail size etc.
-- ```--base=/var/www/html/my-photos```: Used to set the web pages base directory.
-- ```--assets=~/pweb/assets```: (Default /usr/share/pweb) Directory containing template web files such as the album and gallery ```index.html``` files etc. These can be locally customised.
+- ```--base```: Used to set the web pages base directory (default /var/www/html/photos).
+- ```--assets```: Directory containing template web files such as the album and gallery ```index.html``` files etc. These can be locally customised (default /usr/share/pweb).
 
 Other flags exist for various diagnostic functions.
 
