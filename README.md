@@ -200,4 +200,4 @@ cp ${GOROOT}/misc/wasm/wasm_exec.js /var/www/html/pweb
 
 If image downloading is configured, download links are generated as symlinks to the
 original files, and your web server must be configured to allow the following of the symlinks
-to access the file (e.g for apache2, ```Options FollowSymLinks``` must be set for the photos directory.
+to access the file (e.g for apache2, ```Options FollowSymLinks``` must be set for the photos directory).
