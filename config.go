@@ -54,7 +54,7 @@ var configKeywords = map[string]*configOptions{
 	"large":     &configOptions{code: C_LARGE},
 	"caption":   &configOptions{code: C_CAPTION, min: 2, multi: true},
 	"nozip":     &configOptions{code: C_NOZIP},
-	"thumb":     &configOptions{code: C_THUMB},
+	"thumb":     &configOptions{code: C_THUMB, min: 1},
 }
 
 type Config map[int][]string

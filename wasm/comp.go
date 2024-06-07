@@ -17,13 +17,15 @@ type Comp struct {
 func (c *Comp) Wr(s any) *Comp {
 	switch v := s.(type) {
 	case string:
-		c.Write([]byte(v))
+		c.WriteString(v)
 	case fmt.Stringer:
-		c.Write([]byte(v.String()))
+		c.WriteString(v.String())
 	case []byte:
 		c.Write(v)
+	case rune:
+		c.WriteRune(v)
 	case int:
-		c.Write([]byte(strconv.FormatInt(int64(v), 10)))
+		c.WriteString(strconv.FormatInt(int64(v), 10))
 	default:
 		fmt.Println("Wr: Unknown type")
 	}

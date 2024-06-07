@@ -17,12 +17,12 @@ import (
 )
 
 const (
-	thumbWidth    = 160
-	thumbHeight   = 160
 	previewWidth  = 320
 	previewHeight = 240
 )
 
+var thumbWidth int = 160
+var thumbHeight int = 160
 var imageWidth int = 1500
 var imageHeight int = 1200
 
@@ -113,6 +113,20 @@ func main() {
 	}
 	if useSelect {
 		buildRatings(sel, ratingMap, false)
+	}
+	// If a thumbnail size is set, use it.
+	thsz, ok := conf[C_THUMB]
+	if ok {
+		var sz int
+		n, err := fmt.Sscanf(thsz[0], "%d", &sz)
+		if err != nil {
+			log.Fatalf("Bad thumbnail size (%s)", err)
+		}
+		if n != 1 {
+			log.Fatalf("Unknown thumbnail size (%s)", thsz)
+		}
+		thumbWidth = sz
+		thumbHeight = sz
 	}
 	// Build map of captions
 	capt := make(map[string]string)

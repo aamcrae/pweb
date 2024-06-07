@@ -2,4 +2,5 @@ up: ../index.html
 title: Flowers
 dir: flowers
 download:
+thumb: 200
 include: *.jpg

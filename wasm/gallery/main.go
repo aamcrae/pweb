@@ -96,11 +96,10 @@ func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
 		var c wasm.Comp
 		g.title = xmlData.Title
 		if len(xmlData.Back) > 0 {
-			c.Wr("<a href=\"").Wr(xmlData.Back).Wr("\"><h1>").Wr(g.title).Wr("</h1></a>")
 		} else {
 			c.Wr("<h1>").Wr(g.title).Wr("</h1>")
 		}
-		g.header = c.String()
+		g.header = g.HeaderDownload(g.title, xmlData.Back, xmlData.Download)
 	}
 	for i, entry := range xmlData.Photos {
 		img := &Image{name: entry.Name,
@@ -313,22 +312,18 @@ func (g *Gallery) BuildPict(index int) {
 	g.LinkToPict(c, "prev", index-1)
 	c.Wr("<div id=\"home\"><a onclick=\"return showThumbs(").Wr(index).Wr(")\" href=\"#\">back to index</a></div>")
 	g.LinkToPict(c, "next", index+1)
-	c.Wr("<h1>")
+	var t string
 	if len(img.title) > 0 {
-		c.Wr(img.title)
+		t = img.title
 	} else {
-		c.Wr(g.title)
+		t = g.title
 	}
-	c.Wr("</h1>")
+	c.Wr(g.HeaderDownload(t, "", img.download))
 	c.Wr("<div id=\"mainimage\"><img src=\"").Wr(img.filename).Wr("\" alt=\"").Wr(img.title).Wr("\"></div>")
 	// Show image properties etc.
 	c.Wr("<div class=\"properties\"><table summary=\"image properties\" border=\"0\">")
 	g.Property(c, "Date", img.date)
-	if img.download == "" {
-		g.Property(c, "Filename", img.name)
-	} else {
-		g.Property(c, "Filename", fmt.Sprintf("%s <a href=\"%s\" download>[Download original]</a>", img.name, img.download))
-	}
+	g.Property(c, "Filename", img.name)
 	if img.original.Width != 0 && img.original.Height != 0 {
 		g.Property(c, "Original resolution", fmt.Sprintf("%d x %d", img.original.Width, img.original.Height))
 	}
@@ -363,6 +358,23 @@ func (g *Gallery) LinkToPict(c *wasm.Comp, n string, index int) {
 		c.Wr("</a>")
 	}
 	c.Wr("</div>")
+}
+
+func (g *Gallery) HeaderDownload(title, back, download string) string {
+	c := new(wasm.Comp)
+	c.Wr("<h1>")
+	if back != "" {
+		c.Wr("<a href=\"").Wr(back).Wr("\">")
+	}
+	c.Wr(g.title)
+	if back != "" {
+		c.Wr("</a>")
+	}
+	if download != "" {
+		c.Wr("<span style=\"float: right\"><a href=\"").Wr(download).Wr("\">").Wr(rune(0x21A7)).Wr("</a></span>")
+	}
+	c.Wr("</h1>")
+	return c.String()
 }
 
 // updateThumb sets the class for the selected image (used to
