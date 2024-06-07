@@ -15,7 +15,7 @@ built by pweb.
 
 The main goals for pweb is:
 - Minimise the effort required to make a web gallery from a set of images.
-- Take advantage of the hierachial layout of albums and galleries.
+- Take advantage of the hierarchial layout of albums and galleries.
 - Use the available workflow tools to add ratings and captions.
 - Easily maintain and update existing galleries.
 - Optimise the speed of building galleries.
