@@ -157,3 +157,17 @@ The directives are:
 | large | | | If set, generate a larger image to be displayed for the image. Default image size is 1500 x 1200, large image size is 1800 x 1500.|
 | nocaption | | | If set, do not generate captions for the images.|
 | thumb | size | 200 | Set the width and height of the thumbnails generated to this value. The default is 160.|
+
+## Flags
+
+There are some runtime flags that may be used to control ```pweb```. These can be displayed
+via ```pweb --help```. The main ones are:
+- ```--force```: Remove the gallery completely and rebuild it. This is useful when changing the thumbnail size etc.
+- ```base=/var/www/html/my-photos```: Used to set the web pages base directory.
+- ```assets=~/pweb/assets```: (Default /usr/share/pweb) Directory containing template web files such as the album and gallery ```index.html``` files etc. These can be locally customised.
+
+Other flags exist for various diagnostic functions.
+
+## Initial installation
+
+The base directory for the
