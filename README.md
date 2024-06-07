@@ -23,7 +23,9 @@ The main goals for pweb is:
 Using pweb, it is possible to take a set of images and insert these as a new gallery into an existing web site
 by just a couple of simple commands. Maximum advantage is taken of concurrent image processing so that
 creating or updating galleries can be very fast.
+
 ## Navigation
+
 Web pages built by pweb are simple to navigate. For albums, a list of sub-albums and galleries is presented,
 and clicking on the item will navigate to the selected album or gallery.
 Clicking the title of the album will typically navigate back to the upper referencing album. A swipe down or
@@ -47,6 +49,7 @@ When showing the full sized image, swipes will show the next or previous images.
 Swiping down will return to the thumbnail page.
 
 The web pages are responsive to window resizing, displaying more or less thumbnails as necessary.
+
 ## Directory Organisation
 
 The intent is that photos are stored separately from the actual
@@ -105,23 +108,27 @@ whether the web images need to be regenerated.
 The EXIF metadata on the images may be used to provide image headlines/captions, and the XMP Rating can be used
 to filter the selected photos.
 
+The XMP rating is a useful method of filtering images, and is supported by most raw conversion processors.
+In the event that images are not being processed through a workflow that allows setting of
+a XMP rating and captions, there is a separate program called [ptag](https://github.com/aamcrae/ptag) that can be used
+to add a rating and a caption to an existing image.
+
 ## Image Selection
 
 A key part of pweb is the selection of images to be used in the gallery being generated.
-There are a number of ways that images can be selected via the config file.
-The order of images is maintained according to the order they are selected in the config file, unless
-date/time sorting is required.
+Images are selected in the config file via the ```include``` and ```exclude``` directives.
+The order of images is maintained according to the config file, unless
+date sorting is selected.
 
 The process for selecting the final list of images is:
-- One or more ```include``` directives in the config file provides a list of image filenames. These filenames may be
-wildcarded (along with brace expansion). If no ```include``` config exists, a default list is used as ```*.jpg```.
-- A similar ```exclude``` set allows selected files to be excluded from the list.
-- The ```after``` and ```before``` keywords allow wildcarded files to be added after or before a specific image resp. 
-- A ```rating``` and ```select``` directive allows filtering by XMP Rating values.
-
-The XMP rating is a useful method of filtering images, and is supported by most image processors.
-In the event that images are not being processed through a workflow (e.g raw conversion) that allows setting of
-a XMP rating or other metadata such as captions, there is a separate program called [ptag](https://github.com/aamcrae/ptag) that can be used to add a rating and a caption to an existing image.
+- Use one or more ```include``` directives in the config file to provide a list of image filenames. These filenames may be
+wildcarded (along with brace expansion). If no ```include``` directives are configured, a default list is set (```*.jpg```).
+- A similar set of ```exclude``` directives allows selected files to be excluded
+- The ```after``` and ```before``` keywords allow wildcarded files to be added after or before a specific image.
+- A ```rating``` and ```select``` directive allows filtering by XMP Rating values. ```rating``` operates as a value
+(i.e all images rated that value or higher are included). ```select``` will only include images that have the matching rating
+(multiple ratings values may be selected). ```select``` is useful when ratings are used to group images in separate categories.
+Galleries can then be created with combinations of the categories.
 
 ## Config file
 
