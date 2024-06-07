@@ -138,7 +138,7 @@ reverse:
 
 There is only **one** required configuration keyword, ```dir```, that specifies the directory of
 the web site (relative to the base directory) where the generated gallery is to be placed.
-All other config directives have defaults or are optional.
+All other config directives either have defaults or are optional.
 
 The directives are:
 
@@ -147,9 +147,9 @@ The directives are:
 | dir | directory-name | hiking/usa/yosemite | The ```dir``` keyword defines the directory where the generated web pages will be written. The directory is relative to the base web directory set in the ```pweb``` flags.|
 | title | Gallery title | Yosemite Hiking | The title that is placed on the gallery. If no title is specified, "Photo Album" is used.|
 | up | link to referring album | ../index.html | Indicates the album that is referencing this gallery. If set, the path is used to find the ```album.xml``` file that refers to this gallery, and a link is added to the album to this gallery (if none already exists).|
-| include | filenames | day-{2,3}/img_2*.jpg | A list of filenames (which may be wildcards) indicating the images to be included in this gallery. Multiple ```include``` lines may be used.|
+| include | filenames | day-{2,3}/img_2*.jpg | A list of filenames (which may be wildcards) indicating the images to be included in this gallery. Multiple ```include``` lines may be used. If no ```include``` directives are present, the default include of ```*.jpg``` is used.|
 | exclude | filenames | */img_234[5-7].jpg | A list of filenames that are to be excluded from the gallery. Multiple exclude lines are allowed.|
-| after | file filenames | img_1234.jpg other/*.jpg | Insert the list of selected files after the file specified. This allows files to be placed in particular order.|
+| after | file filenames | img_1234.jpg other/*.jpg | Insert the list of selected files after the file specified. This allows files to be placed in a particular order.|
 | before | file filenames | img_4321.jpg other/*.jpg | Similar to ```after``` except the files are placed immediately before the file selected.|
 | rating | 0 - 5 | 3 | Selects images that have a XMP rating this value or higher. Images that have XMP Rating metadata or with rating values less than the selected value are excluded.|
 | select | 0 - 5 | 2 4 5| Selects images where the XMP rating matches one of the of rating values in the list. Only one of ```rating``` or ```select``` may be used, they are mutally exclusive.|
@@ -185,6 +185,6 @@ cp assets/css/* /var/www/html/pweb
 ```
 (cd wasm/album; GOOS=js GOARCH=wasm go build -o /var/www/html/pweb/album.wasm)
 (cd wasm/gallery; GOOS=js GOARCH=wasm go build -o /var/www/html/pweb/gallery.wasm)
-cp ${GOROOT}/misc/wasm/wasm_exec.js /var/www/html/pweb/gallery.wasm
+cp ${GOROOT}/misc/wasm/wasm_exec.js /var/www/html/pweb
 ```
 - The album-template.xml and gallery-template.xml files may be customised to add a copyright owner.
