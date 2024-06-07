@@ -32,9 +32,13 @@ When showing the full sized image, swipes will show the next or previous images.
 Swiping down will return to the thumbnail page.
 
 The web pages are responsive to window resizing, displaying more or less thumbnails as necessary.
-## Web Directory Layout
-The directory layout where pweb inserts the generated pages are assumed to be
-in the following (example) organisation:
+## Directory Organisation
+
+The intent is that photos are stored separately from the actual
+web pages, and that pweb will perform all the necessary processing to
+create a web gallery for the photos, resizing and copying them to the web site.
+
+A typical web site directory layout may be:
 ```
   [base directory]
     |_ index.html
@@ -68,3 +72,21 @@ that is meant to reference the gallery, and generate the necessary gallery.xml f
 ```index.html``` to the target web page directory.
 Top level albums that reference other albums will need to be initially created (usually by copying an
 existing album.xml file.
+
+## Workflow
+
+A typical workflow for using pweb to generate new galleries may be:
+
+1. Take photos.
+2. Process the photos using your favourite raw converter, adding titles and a rating.
+3. Create a ```pweb``` config file that contains all the appropriate information that pweb requires to generate the web pages (see below). Often it's easy to copy a config file from another gallery.
+4. Run ```pweb``` with the config file as an argument (if none is provided, the default file ```.web``` is used).
+
+The web pages and resized image files are generated and placed in the location provided in the config file, and
+the album referencing the gallery is updated.
+```pweb``` may be run at any time using the same config file to update or regenerate the gallery, typically
+if photos need to be added or removed from the gallery. The modification time on the images is used to identify
+if the web images need to be regenerated.
+
+The EXIF metadata on the images may be used to provide image headlines/captions, and the XMP Rating can be used
+to filter the selected photos.
