@@ -96,8 +96,8 @@ A typical workflow for using pweb to generate new galleries may be:
 The web pages and resized image files are generated and placed in the location provided in the config file, and
 the album referencing the gallery is updated.
 ```pweb``` may be run at any time using the same config file to update or regenerate the gallery, typically
-if photos need to be added or removed from the gallery. The modification time on the images is used to identify
-if the web images need to be regenerated.
+if photos need to be added or removed from the gallery. The modification time on the images is used to check
+whether the web images need to be regenerated.
 
 The EXIF metadata on the images may be used to provide image headlines/captions, and the XMP Rating can be used
 to filter the selected photos.
@@ -146,7 +146,7 @@ The directives are:
 |---------|-----------|---------|-------------|
 | dir | directory-name | hiking/usa/yosemite | The ```dir``` keyword defines the directory where the generated web pages will be written. The directory is relative to the base web directory set in the ```pweb``` flags.|
 | title | Gallery title | Yosemite Hiking | The title that is placed on the gallery. If no title is specified, "Photo Album" is used.|
-| up | link to referring album | ../index.html | Indicates the album that is referencing this gallery. If set, the path is used to find the ```album.xml``` file that refers to this gallery, and a link is added to the album to this gallery (if none already exists).|
+| up | link to referring album | ../index.html | Indicates the album that is referencing this gallery. If set, the path is used to find the ```album.xml``` file that refers to this gallery, and a link is added to the album to this gallery (if none already exists). If this directorive is not present, no change is made to any referring album, and no link back from this gallery is generated (this is useful to create a private or orphaned gallery, inaccessible from the main album navigation).|
 | include | filenames | day-{2,3}/img_2*.jpg | A list of filenames (which may be wildcards) indicating the images to be included in this gallery. Multiple ```include``` lines may be used. If no ```include``` directives are present, the default include of ```*.jpg``` is used.|
 | exclude | filenames | */img_234[5-7].jpg | A list of filenames that are to be excluded from the gallery. Multiple exclude lines are allowed.|
 | after | file filenames | img_1234.jpg other/*.jpg | Insert the list of selected files after the file specified. This allows files to be placed in a particular order.|
@@ -188,3 +188,7 @@ cp assets/css/* /var/www/html/pweb
 cp ${GOROOT}/misc/wasm/wasm_exec.js /var/www/html/pweb
 ```
 - The album-template.xml and gallery-template.xml files may be customised to add a copyright owner.
+
+If image downloading is configured, download links are generated as symlinks to the
+original files, and your web server must be configured to allow the following of the symlinks
+to access the file (e.g for apache2, ```Options FollowSymLinks``` must be set for the photos directory.
