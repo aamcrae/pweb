@@ -144,3 +144,16 @@ The directives are:
 | title | Gallery title | Yosemite Hiking | The title that is placed on the gallery. If no title is specified, "Photo Album" is used.|
 | up | link to referring album | ../index.html | Indicates the album that is referencing this gallery. If set, the path is used to find the ```album.xml``` file that refers to this gallery, and a link is added to the album to this gallery (if none already exists).|
 | include | filenames | day-{2,3}/img_2*.jpg | A list of filenames (which may be wildcards) indicating the images to be included in this gallery. Multiple ```include``` lines may be used.|
+| exclude | filenames | */img_234[5-7].jpg | A list of filenames that are to be excluded from the gallery. Multiple exclude lines are allowed.|
+| after | file filenames | img_1234.jpg other/*.jpg | Insert the list of selected files after the file specified. This allows files to be placed in particular order.|
+| before | file filenames | img_4321.jpg other/*.jpg | Similar to ```after``` except the files are placed immediately before the file selected.|
+| rating | Rating value | 3 | Selects images that only have XMP Ratings this value or higher. Images that have XMP Rating metadata or with rating values less than the selected value are excluded.|
+| select | Rating values | 2 4 5| Selects images where the XMP rating matches one of the of rating values indicated. Only one of ```rating``` or ```select``` may be used, they are mutally exclusive.|
+| download | | | Allow the original images to be downloaded via a link in the generated web pages. Also, unless ```nozip``` is set, create a ```photos.zip``` file containing all of the photos in the gallery, and provide a link to download this zip file.|
+| nozip | | | If set, do not generate a ```photos.zip``` file for download.|
+| sort | date | date | Only one argument is supported, ```date```, which will sort the images by date. The date used is extracted from the EXIF of the image, or the modification time if no EXIF date is available.|
+| reverse | | | If set, add the link to this gallery to the start of the list in the referring album; otherwise, the link to the gallery will be placed at the end of the album list.|
+| caption | file title | img1234.jpg Nice flowers | Use this title string for the caption on the image; any EXIF captions are ignored.|
+| large | | | If set, generate a larger image to be displayed for the image. Default image size is 1500 x 1200, large image size is 1800 x 1500.|
+| nocaption | | | If set, do not generate captions for the images.|
+| thumb | size | 200 | Set the width and height of the thumbnails generated to this value. The default is 160.|
