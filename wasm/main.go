@@ -1,14 +1,29 @@
 package main
 
 import (
+	"sync"
+
 	"github.com/aamcrae/pweb/data"
 )
 
 func main() {
+	// Try to concurrently load both album.xml and gallery.xml
+	var wg sync.WaitGroup
+	wg.Add(2)
+	var aData, gData []byte
+	go func() {
+		aData, _ = GetContent(data.AlbumFile)
+		wg.Done()
+	}()
+	go func() {
+		gData, _ = GetContent(data.GalleryFile)
+		wg.Done()
+	}()
 	w := GetWindow()
-	if aData, err := GetContent(data.AlbumFile); err == nil {
+	wg.Wait()
+	if len(aData) > 0 {
 		RunAlbum(w, aData)
-	} else if gData, err := GetContent(data.GalleryFile); err == nil {
+	} else if len(gData) > 0 {
 		RunGallery(w, gData)
 	} else {
 		w.SetTitle("No album or gallery")
