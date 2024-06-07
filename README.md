@@ -137,6 +137,7 @@ the web site (relative to the base directory) where the generated gallery is to 
 All other config directives have defaults or are optional.
 
 The directives are:
+
 | Keyword | Arguments | Example | Description |
 |---------------------------------------------|
 | dir | directory-name | hiking/usa/yosemite | The ```dir``` keyword defines the directory where the generated web pages will be written. The directory is relative to the base web directory set in the ```pweb``` flags.|
