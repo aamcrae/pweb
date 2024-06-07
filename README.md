@@ -139,7 +139,7 @@ All other config directives have defaults or are optional.
 The directives are:
 
 | Keyword | Arguments | Example | Description |
-|---------------------------------------------|
+|---------|-----------|---------|-------------|
 | dir | directory-name | hiking/usa/yosemite | The ```dir``` keyword defines the directory where the generated web pages will be written. The directory is relative to the base web directory set in the ```pweb``` flags.|
 | title | Gallery title | Yosemite Hiking | The title that is placed on the gallery. If no title is specified, "Photo Album" is used.|
 | up | link to referring album | ../index.html | Indicates the album that is referencing this gallery. If set, the path is used to find the ```album.xml``` file that refers to this gallery, and a link is added to the album to this gallery (if none already exists).|
