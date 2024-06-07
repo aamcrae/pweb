@@ -31,15 +31,16 @@ const (
 // configOptions contains some options for the configuration keywords.
 type configOptions struct {
 	code  int
-	min   int
-	max   int
-	multi bool
-	count int
+	min   int  // Minimum number of arguments
+	max   int  // Maximum number of arguments
+	multi bool // keyword can be used multiple times
+	str   bool // Argument is a single string
+	count int  // Count of times keyword has been seen
 }
 
 var configKeywords = map[string]*configOptions{
 	"up":        &configOptions{code: C_UP, min: 1, max: 1},
-	"title":     &configOptions{code: C_TITLE, min: 1, max: 1},
+	"title":     &configOptions{code: C_TITLE, min: 1, str: true},
 	"dir":       &configOptions{code: C_DIR, min: 1, max: 1},
 	"include":   &configOptions{code: C_INCLUDE, min: 1, multi: true},
 	"exclude":   &configOptions{code: C_EXCLUDE, min: 1, multi: true},
@@ -53,7 +54,7 @@ var configKeywords = map[string]*configOptions{
 	"sort":      &configOptions{code: C_SORT, min: 1, max: 1},
 	"reverse":   &configOptions{code: C_REVERSE},
 	"large":     &configOptions{code: C_LARGE},
-	"caption":   &configOptions{code: C_CAPTION, min: 2, multi: true},
+	"caption":   &configOptions{code: C_CAPTION, min: 2, str: true, multi: true},
 	"nozip":     &configOptions{code: C_NOZIP},
 	"thumb":     &configOptions{code: C_THUMB, min: 1, max: 1},
 }
@@ -87,7 +88,7 @@ func ReadConfig(f string) Config {
 			if len(strings.Fields(cmd[1])) < c.min {
 				log.Fatalf("%s: line %d, not enough arguments for '%s'", f, i, cmd[0])
 			}
-			if !c.multi && len(strings.Fields(cmd[1])) > c.max {
+			if !c.str && !c.multi && len(strings.Fields(cmd[1])) > c.max {
 				log.Fatalf("%s: line %d, too many arguments for '%s'", f, i, cmd[0])
 			}
 			trimmed := strings.TrimLeft(cmd[1], " ")
