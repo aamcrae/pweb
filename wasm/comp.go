@@ -1,4 +1,4 @@
-package wasm
+package main
 
 import (
 	"fmt"
@@ -28,14 +28,6 @@ func (c *Comp) Wr(s any) *Comp {
 		c.WriteString(strconv.FormatInt(int64(v), 10))
 	default:
 		fmt.Println("Wr: Unknown type")
-	}
-	return c
-}
-
-// Add a copyright string
-func (c *Comp) Copyright(owner string) *Comp {
-	if len(owner) > 0 {
-		c.Wr("<div id=\"copyright\">&nbsp; &copy; Copyright ").Wr(owner).Wr("</div>")
 	}
 	return c
 }

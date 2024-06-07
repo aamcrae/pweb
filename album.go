@@ -20,7 +20,7 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) {
 	albumDir := path.Dir(path.Join(dest, dir, back))
 	album := path.Join(albumDir, data.AlbumFile)
 	// Whatever happens with the album file, make sure that the album HTML is up to date.
-	cpFile(path.Join(*assets, "album-index.html"), path.Join(albumDir, "index.html"))
+	cpFile(path.Join(*assets, "index.html"), path.Join(albumDir, "index.html"))
 	// The back reference (usually "../index.html") may actually refer
 	// back to deeper levels, so to create the link forward, copy as
 	// many directory elements as necessary from the destination directory

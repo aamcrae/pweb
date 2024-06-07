@@ -7,7 +7,6 @@ import (
 	"syscall/js"
 
 	"github.com/aamcrae/pweb/data"
-	"github.com/aamcrae/pweb/wasm"
 )
 
 const (
@@ -37,7 +36,7 @@ type Image struct {
 
 // Gallery holds the collection of images that form a photo gallery
 type Gallery struct {
-	w          *wasm.Window
+	w          *Window
 	title      string   // Title of gallery
 	header     string   // HTML of title of page
 	imagePage  bool     // If set, displaying the full sized image, otherwise showing thumbnails
@@ -52,22 +51,13 @@ type Gallery struct {
 	images     []*Image // slice of images in the gallery
 }
 
-func main() {
-	w := wasm.GetWindow()
+func RunGallery(w *Window, gx []byte) {
 	w.LoadStyle("/pweb/gallery-style.css")
-	gXml, err := wasm.GetContent(data.GalleryFile)
-	if err != nil {
-		var c wasm.Comp
-		w.SetTitle("No gallery!")
-		c.Wr("<h1>No photo gallery!</h1>")
-		w.Display(c.String())
-		return
-	}
 	var gallery data.Gallery
-	err = xml.Unmarshal(gXml, &gallery)
+	err := xml.Unmarshal(gx, &gallery)
 	if err != nil {
 		fmt.Printf("unmarshal: %v\n", err)
-		var c wasm.Comp
+		var c Comp
 		c.Wr("<h1>Bad or no gallery data!</h1>")
 		w.Display(c.String())
 		return
@@ -84,7 +74,7 @@ func main() {
 }
 
 // newGallery creates a new gallery from the XML data provided.
-func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
+func newGallery(xmlData *data.Gallery, w *Window) *Gallery {
 	g := &Gallery{w: w,
 		owner: xmlData.Copyright,
 		tw:    xmlData.Thumb.Width,
@@ -95,7 +85,7 @@ func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
 		ih:    xmlData.Image.Height,
 	}
 	if len(xmlData.Title) > 0 {
-		var c wasm.Comp
+		var c Comp
 		g.title = xmlData.Title
 		if len(xmlData.Back) > 0 {
 		} else {
@@ -114,7 +104,7 @@ func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
 			exposure: entry.Exposure,
 			iso:      entry.ISO,
 			flen:     entry.FocalLength}
-		var ct wasm.Comp
+		var ct Comp
 		ct.Wr(fmt.Sprintf("<div class=\"holder\"><div id=\"slide%d\" class=\"slideshow\">", i))
 		ct.Wr(fmt.Sprintf("<a onclick=\"return showPict(%d)\" href=\"#\">", i))
 		ct.Wr("<img src=\"t/").Wr(img.filename).Wr("\" title=\"").Wr(img.title).Wr("\">")
@@ -127,7 +117,7 @@ func newGallery(xmlData *data.Gallery, w *wasm.Window) *Gallery {
 		g.images = append(g.images, img)
 	}
 	// Install some style elements now that we know the thumbnail sizes
-	c := new(wasm.Comp)
+	c := new(Comp)
 	c.Wr(".holder {width:").Wr(g.tw + 10).Wr("px;height:").Wr(g.th + 30).Wr("px}")
 	c.Wr(".thumbName{width:").Wr(g.tw + 10).Wr("px}")
 	g.w.AddStyle(c.String())
@@ -145,22 +135,22 @@ func (g *Gallery) Resize() {
 }
 
 // Swipe handles a touch swipe action
-func (g *Gallery) Swipe(d wasm.Direction) {
+func (g *Gallery) Swipe(d Direction) {
 	if g.imagePage {
 		switch d {
-		case wasm.Down:
+		case Down:
 			g.SelectThumb(g.curImage)
-		case wasm.Right:
+		case Right:
 			g.ImageDisplay(g.curImage - 1)
-		case wasm.Left:
+		case Left:
 			g.ImageDisplay(g.curImage + 1)
 		}
 	} else {
 		perPage := g.rows * g.cols
 		switch d {
-		case wasm.Right:
+		case Right:
 			g.SelectThumb(g.curImage - perPage)
-		case wasm.Left:
+		case Left:
 			g.SelectThumb(g.curImage + perPage)
 		}
 	}
@@ -261,7 +251,7 @@ func (g *Gallery) ShowThumbs(this js.Value, p []js.Value) any {
 // ShowPage displays the thumbnail page of the current image.
 func (g *Gallery) ShowPage() {
 	g.imagePage = false
-	c := new(wasm.Comp)
+	c := new(Comp)
 	g.w.SetTitle(g.title)
 	g.cols, g.rows = g.tableSize()
 	perPage := g.rows * g.cols
@@ -293,13 +283,13 @@ func (g *Gallery) ShowPage() {
 	}
 	g.lastImage = i - 1
 	c.Wr("</div><br style=\"clear: both\" />\n")
-	c.Copyright(g.owner)
+	Copyright(c, g.owner)
 	g.w.Display(c.String())
 	g.updateThumb(g.curImage, thumbOn)
 }
 
 // LinkToPage generates HTML for a link to a thumbnail page.
-func (g *Gallery) LinkToPage(c *wasm.Comp, txt string, pageNo, index int, class string) {
+func (g *Gallery) LinkToPage(c *Comp, txt string, pageNo, index int, class string) {
 	c.Wr("<a class=\"").Wr(class).Wr("\" ")
 	if pageNo >= 0 {
 		c.Wr("id=\"navlink").Wr(pageNo).Wr("\" ")
@@ -310,7 +300,7 @@ func (g *Gallery) LinkToPage(c *wasm.Comp, txt string, pageNo, index int, class 
 // BuildPict creates the full page HTML for this image
 func (g *Gallery) BuildPict(index int) {
 	img := g.images[index]
-	c := new(wasm.Comp)
+	c := new(Comp)
 	g.LinkToPict(c, "prev", index-1)
 	c.Wr("<div id=\"home\"><a onclick=\"return showThumbs(").Wr(index).Wr(")\" href=\"#\">back to index</a></div>")
 	g.LinkToPict(c, "next", index+1)
@@ -334,19 +324,19 @@ func (g *Gallery) BuildPict(index int) {
 	g.Property(c, "ISO", img.iso)
 	g.Property(c, "Focal length", img.flen)
 	c.Wr("</table></div>")
-	c.Copyright(g.owner)
+	Copyright(c, g.owner)
 	img.imagePage = c.String()
 }
 
 // Property generates HTML for the image metadata (name, size etc.)
-func (g *Gallery) Property(c *wasm.Comp, n, val string) {
+func (g *Gallery) Property(c *Comp, n, val string) {
 	if val != "" {
 		c.Wr("<tr><td class=\"exifname\">").Wr(n).Wr("</td><td class=\"exifdata\">").Wr(val).Wr("</td></tr>")
 	}
 }
 
 // LinkToPict generates HTML for a link to the selected picture.
-func (g *Gallery) LinkToPict(c *wasm.Comp, n string, index int) {
+func (g *Gallery) LinkToPict(c *Comp, n string, index int) {
 	c.Wr("<div id=\"").Wr(n).Wr("\">")
 	if index < 0 || index == len(g.images) {
 		c.Wr("&nbsp")
@@ -363,7 +353,7 @@ func (g *Gallery) LinkToPict(c *wasm.Comp, n string, index int) {
 }
 
 func (g *Gallery) HeaderDownload(title, back, download string) string {
-	c := new(wasm.Comp)
+	c := new(Comp)
 	c.Wr("<h1>")
 	if download != "" {
 		c.Wr(hSpace)

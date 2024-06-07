@@ -245,7 +245,7 @@ func main() {
 		updateZip(path.Join(destDir, "d"))
 	}
 	// Conditionally copy the main index.html file.
-	if err := cpFile(path.Join(*assets, "gallery-index.html"), path.Join(destDir, "index.html")); err != nil {
+	if err := cpFile(path.Join(*assets, "index.html"), path.Join(destDir, "index.html")); err != nil {
 		log.Fatalf("index.html: Update %v", err)
 	}
 }

@@ -2,7 +2,7 @@
 pweb is a generator for web based photo albums. It uses a [config](example/photos/web) file
 that provides the parameters.
 
-pweb uses web-assembly programs to dynamically generate the web pages
+pweb uses a web-assembly program to dynamically generate the web pages
 using XML data files as the source. There are 2 types of XML files used, album and gallery.
 An album essentially points to a list of other albums and galleries, and is used
 as a navigation menu. A gallery is a collection of images presented as a set of thumbnail pages;
@@ -75,14 +75,13 @@ Each directory either contains an album or a gallery. The directory layout
 basically follows the navigation layout of the web site (clicking on albums or galleries will
 step to that directory).
 
-There are separate ```index.html``` files for
-(albums)[assets/album-index.html] and (galleries)[assets/gallery-index.html],
-with the only difference being the WASM file loaded (TODO: merge into a single binary).
+The [index.html](assets/index.html) file is used for both albums and galleries, and is
+basically just used for loading the web assembly program.
 When a gallery is created or updated, pweb will append the new gallery to the album
-that is meant to reference the gallery, and generate the necessary gallery.xml file and install the appropriate
-```index.html``` to the target web page directory.
-Top level albums that reference other albums will need to be initially created (usually by copying an
-existing album.xml file.
+that is meant to reference the gallery, and generate the necessary gallery.xml file and
+install the ```index.html``` file to the target web page directory.
+Top level albums that reference other albums will need to be initially created (usually by copying
+and modifying an existing ```album.xml``` file).
 
 ## Workflow
 
@@ -183,8 +182,7 @@ cp assets/css/* /var/www/html/pweb
 ```
 - Build and install the WASM support and binaries:
 ```
-(cd wasm/album; GOOS=js GOARCH=wasm go build -o /var/www/html/pweb/album.wasm)
-(cd wasm/gallery; GOOS=js GOARCH=wasm go build -o /var/www/html/pweb/gallery.wasm)
+(cd wasm; GOOS=js GOARCH=wasm go build -o /var/www/html/pweb/pweb.wasm)
 cp ${GOROOT}/misc/wasm/wasm_exec.js /var/www/html/pweb
 ```
 - The album-template.xml and gallery-template.xml files may be customised to add a copyright owner.

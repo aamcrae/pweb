@@ -15,8 +15,7 @@ photos: dir
 	(cd photos; pweb --assets=../../assets --base=${WEB} web)
 
 assets: dir
-	(cd ../wasm/album; GOOS=js GOARCH=wasm go build -o ${ASSETS}/album.wasm)
-	(cd ../wasm/gallery; GOOS=js GOARCH=wasm go build -o ${ASSETS}/gallery.wasm)
+	(cd ../wasm; GOOS=js GOARCH=wasm go build -o ${ASSETS}/pweb.wasm)
 	cp ../assets/css/*  ${ASSETS}
 	cp ${GOROOT}/misc/wasm/wasm_exec.js ${ASSETS}
 
