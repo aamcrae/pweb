@@ -151,8 +151,8 @@ The directives are:
 | exclude | filenames | */img_234[5-7].jpg | A list of filenames that are to be excluded from the gallery. Multiple exclude lines are allowed.|
 | after | file filenames | img_1234.jpg other/*.jpg | Insert the list of selected files after the file specified. This allows files to be placed in particular order.|
 | before | file filenames | img_4321.jpg other/*.jpg | Similar to ```after``` except the files are placed immediately before the file selected.|
-| rating | Rating value | 3 | Selects images that only have XMP Ratings this value or higher. Images that have XMP Rating metadata or with rating values less than the selected value are excluded.|
-| select | Rating values | 2 4 5| Selects images where the XMP rating matches one of the of rating values indicated. Only one of ```rating``` or ```select``` may be used, they are mutally exclusive.|
+| rating | 0 - 5 | 3 | Selects images that have a XMP rating this value or higher. Images that have XMP Rating metadata or with rating values less than the selected value are excluded.|
+| select | 0 - 5 | 2 4 5| Selects images where the XMP rating matches one of the of rating values in the list. Only one of ```rating``` or ```select``` may be used, they are mutally exclusive.|
 | download | | | Allow the original images to be downloaded via a link in the generated web pages. Also, unless ```nozip``` is set, create a ```photos.zip``` file containing all of the photos in the gallery, and provide a link to download this zip file.|
 | nozip | | | If set, do not generate a ```photos.zip``` file for download.|
 | sort | date | date | Only one argument is supported, ```date```, which will sort the images by date. The date used is extracted from the EXIF of the image, or the modification time if no EXIF date is available.|
