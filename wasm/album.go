@@ -10,9 +10,6 @@ import (
 func RunAlbum(w *Window, ax []byte) {
 	w.LoadStyle("/pweb/album-style.css")
 	var c Comp
-	defer func() {
-		w.Display(c.String())
-	}()
 	var album data.AlbumPage
 	err := xml.Unmarshal(ax, &album)
 	if err != nil {
@@ -21,6 +18,21 @@ func RunAlbum(w *Window, ax []byte) {
 		return
 	}
 	displayAlbum(&album, w, &c)
+	w.Display(c.String())
+	if len(album.Back) > 0 {
+		w.OnKey(func(key string) {
+			switch key {
+			case "ArrowLeft", "ArrowUp":
+				w.Goto(album.Back)
+			}
+		})
+		w.OnSwipe(func(d Direction) {
+			if d == Down {
+				w.Goto(album.Back)
+			}
+		})
+	}
+	w.Wait()
 }
 
 // displayAlbum generates the HTML for the album from the XML data.

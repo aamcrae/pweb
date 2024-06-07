@@ -39,6 +39,7 @@ type Gallery struct {
 	w          *Window
 	title      string   // Title of gallery
 	header     string   // HTML of title of page
+	back string // Referring link
 	imagePage  bool     // If set, displaying the full sized image, otherwise showing thumbnails
 	firstImage int      // The index of the first thumbnail displayed on the page
 	lastImage  int      // The index of the last thumbnail displayed on the page
@@ -76,6 +77,8 @@ func RunGallery(w *Window, gx []byte) {
 // newGallery creates a new gallery from the XML data provided.
 func newGallery(xmlData *data.Gallery, w *Window) *Gallery {
 	g := &Gallery{w: w,
+		title: xmlData.Title,
+		back: xmlData.Back,
 		owner: xmlData.Copyright,
 		tw:    xmlData.Thumb.Width,
 		th:    xmlData.Thumb.Height,
@@ -84,15 +87,10 @@ func newGallery(xmlData *data.Gallery, w *Window) *Gallery {
 		iw:    xmlData.Image.Width,
 		ih:    xmlData.Image.Height,
 	}
-	if len(xmlData.Title) > 0 {
-		var c Comp
-		g.title = xmlData.Title
-		if len(xmlData.Back) > 0 {
-		} else {
-			c.Wr("<h1>").Wr(g.title).Wr("</h1>")
-		}
-		g.header = g.HeaderDownload(g.title, xmlData.Back, xmlData.Download)
+	if g.title == "" {
+		g.title = "Gallery"
 	}
+	g.header = g.HeaderDownload(g.title, g.back, xmlData.Download)
 	for i, entry := range xmlData.Photos {
 		img := &Image{name: entry.Name,
 			filename: entry.Filename,
@@ -148,6 +146,10 @@ func (g *Gallery) Swipe(d Direction) {
 	} else {
 		perPage := g.rows * g.cols
 		switch d {
+		case Down:
+			if len(g.back) > 0 {
+				g.w.Goto(g.back)
+			}
 		case Right:
 			g.SelectThumb(g.curImage - perPage)
 		case Left:
@@ -165,9 +167,9 @@ func (g *Gallery) KeyPress(key string) {
 			g.ImageDisplay(0)
 		case "End":
 			g.ImageDisplay(len(g.images) - 1)
-		case "ArrowRight":
+		case "ArrowRight", "PageDown":
 			g.ImageDisplay(g.curImage + 1)
-		case "ArrowLeft":
+		case "ArrowLeft", "PageUp":
 			g.ImageDisplay(g.curImage - 1)
 		case "ArrowUp":
 			g.SelectThumb(g.curImage)
@@ -189,6 +191,10 @@ func (g *Gallery) KeyPress(key string) {
 			g.SelectThumb(g.curImage - g.cols)
 		case "ArrowDown":
 			g.SelectThumb(g.curImage + g.cols)
+		case "PageDown":
+			g.SelectThumb(g.curImage + g.rows * g.cols)
+		case "PageUp":
+			g.SelectThumb(g.curImage - g.rows * g.cols)
 		}
 	}
 }
@@ -311,7 +317,7 @@ func (g *Gallery) BuildPict(index int) {
 		t = g.title
 	}
 	c.Wr(g.HeaderDownload(t, "", img.download))
-	c.Wr("<div id=\"mainimage\"><img src=\"").Wr(img.filename).Wr("\" alt=\"").Wr(img.title).Wr("\"></div>")
+	c.Wr("<div id=\"mainimage\"><img src=\"").Wr(img.filename).Wr("\" alt=\"").Wr(t).Wr("\"></div>")
 	// Show image properties etc.
 	c.Wr("<div class=\"properties\"><table summary=\"image properties\" border=\"0\">")
 	g.Property(c, "Date", img.date)
@@ -361,7 +367,7 @@ func (g *Gallery) HeaderDownload(title, back, download string) string {
 	if back != "" {
 		c.Wr("<a href=\"").Wr(back).Wr("\">")
 	}
-	c.Wr(g.title)
+	c.Wr(title)
 	if back != "" {
 		c.Wr("</a>")
 	}

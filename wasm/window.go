@@ -80,6 +80,11 @@ func (w *Window) SetTitle(title string) *Window {
 	return w
 }
 
+// Goto navigates the browser to the URL.
+func (w *Window) Goto(url string) {
+	w.window.Get("location").Set("href", js.ValueOf(url))
+}
+
 // OnSwipe registers a callback to be called for swipe events.
 func (w *Window) OnSwipe(f func(Direction)) {
 	touchStartJS := js.FuncOf(func(this js.Value, args []js.Value) any {
