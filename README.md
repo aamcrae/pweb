@@ -12,6 +12,17 @@ EXIF tags and metadata is used to add titles, or selectively filter the list by 
 
 [My own photo web site](http://amcrae.au/photos/index.html) is an example of an extensive web site
 built by pweb.
+
+The main goals for pweb is:
+- Minimise the effort required to make a web gallery from a set of images.
+- Take advantage of the hierachial layout of albums and galleries.
+- Use the available workflow tools to add ratings and captions.
+- Easily maintain and update existing galleries.
+- Optimise the speed of building galleries.
+
+Using pweb, it is possible to take a set of images and insert these as a new gallery into an existing web site
+by just a couple of simple commands. Maximum advantage is taken of concurrent image processing so that
+creating or updating galleries can be very fast.
 ## Navigation
 Web pages built by pweb are simple to navigate. For albums, a list of sub-albums and galleries is presented,
 and clicking on the item will navigate to the selected album or gallery.
@@ -79,7 +90,7 @@ A typical workflow for using pweb to generate new galleries may be:
 
 1. Take photos.
 2. Process the photos using your favourite raw converter, adding titles and a rating.
-3. Create a ```pweb``` config file that contains all the appropriate information that pweb requires to generate the web pages (see below). Often it's easy to copy a config file from another gallery.
+3. Create a config file that contains all the appropriate information that pweb requires to generate the web pages (see below). Often it's easiest to cut'n'paste an existing config file.
 4. Run ```pweb``` with the config file as an argument (if none is provided, the default file ```.web``` is used).
 
 The web pages and resized image files are generated and placed in the location provided in the config file, and
@@ -90,3 +101,19 @@ if the web images need to be regenerated.
 
 The EXIF metadata on the images may be used to provide image headlines/captions, and the XMP Rating can be used
 to filter the selected photos.
+
+## Image Selection
+
+A key part of pweb is the selection of images to be used in the gallery being generated.
+There are a number of ways that images can be selected via the config file.
+The order of images is maintained according to the order they are selected in the config file, unless
+date/time sorting is required.
+
+The process for selecting the final list of images is:
+- One or more ```include``` directives in the config file provides a list of image filenames. These filenames may be
+wildcarded (along with brace expansion). If no ```include``` config exists, a default list is used as ```*.jpg```.
+- A similar ```exclude``` set allows selected files to be excluded from the list.
+- The ```after``` and ```before``` keywords allow wildcarded files to be added after or before a specific image resp. 
+- A ```rating``` and ```select``` directive allows filtering by XMP Rating values.
+
+## Config file

@@ -175,11 +175,16 @@ func main() {
 		imageWidth = 1800
 		imageHeight = 1500
 	}
-	title, _ := conf[C_TITLE]
+	var title string
+	if t, ok := conf[C_TITLE]; !ok {
+		title = "Photo album"
+	} else {
+		title = t[0]
+	}
 	up, upConfigured := conf[C_UP]
 	_, reverse := conf[C_REVERSE]
 	if upConfigured {
-		UpdateAlbum(up[0], *baseDir, dir, title[0], reverse)
+		UpdateAlbum(up[0], *baseDir, dir, title, reverse)
 	}
 	_, download := conf[C_DOWNLOAD]
 	_, nozip := conf[C_NOZIP]
@@ -196,7 +201,7 @@ func main() {
 	var g data.Gallery
 	// Preload gallery XML from template (to set copyright etc.)
 	ReadXml(path.Join(*assets, data.TemplateGalleryFile), &g)
-	g.Title = title[0]
+	g.Title = title
 	if download && !nozip {
 		g.Download = path.Join("d", "photos.zip")
 	}
