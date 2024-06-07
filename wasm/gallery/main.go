@@ -371,7 +371,7 @@ func (g *Gallery) HeaderDownload(title, back, download string) string {
 		c.Wr("</a>")
 	}
 	if download != "" {
-		c.Wr("<span style=\"float: right\"><a href=\"").Wr(download).Wr("\">").Wr(rune(0x21A7)).Wr("</a></span>")
+		c.Wr("<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"").Wr(download).Wr("\">").Wr(rune(0x21A7)).Wr("</a></span>")
 	}
 	c.Wr("</h1>")
 	return c.String()
