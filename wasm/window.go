@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"syscall/js"
 )
 
 // Minimum movement to consider a touch event to be a swipe.
 const minSwipe = 30
+// Maximum time before a touch event stops being a swipe.
+const maxSwipeTime = time.Millisecond * 300
 
 // Direction is an enum indicating the swipe direction.
 type Direction int
@@ -26,6 +29,7 @@ type Window struct {
 	window, document, head, body js.Value
 	Width, Height                int
 	// touch values
+	startTime time.Time
 	startX, startY int
 	endX, endY     int
 	multiTouch     bool
@@ -86,13 +90,15 @@ func (w *Window) Goto(url string) {
 }
 
 // OnSwipe registers a callback to be called for swipe events.
-func (w *Window) OnSwipe(f func(Direction)) {
+// If the callback handles the event, it returns true.
+func (w *Window) OnSwipe(f func(Direction) bool) {
 	touchStartJS := js.FuncOf(func(this js.Value, args []js.Value) any {
 		t := args[0].Get("touches")
 		if t.IsUndefined() {
 			fmt.Printf("cannot find touches\n")
 			return nil
 		}
+		w.startTime = time.Now()
 		w.startX = t.Index(0).Get("clientX").Int()
 		w.startY = t.Index(0).Get("clientY").Int()
 		w.endX = w.startX
@@ -117,6 +123,11 @@ func (w *Window) OnSwipe(f func(Direction)) {
 	})
 	touchEndJS := js.FuncOf(func(this js.Value, args []js.Value) any {
 		if w.multiTouch {
+			return nil
+		}
+		// If the swipe event lasted more than the preset max, do not
+		// consider this a swipe event.
+		if time.Now().Sub(w.startTime) > maxSwipeTime {
 			return nil
 		}
 		e := args[0]
@@ -145,9 +156,11 @@ func (w *Window) OnSwipe(f func(Direction)) {
 				d = Down
 			}
 		}
-		// Don't process the default action
-		e.Call("preventDefault")
-		f(d)
+		if f(d) {
+			// Don't process the default action if the
+			// swipe was handled by the callback
+			e.Call("preventDefault")
+		}
 		return nil
 	})
 	touchCancelJS := js.FuncOf(func(this js.Value, args []js.Value) any {

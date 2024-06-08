@@ -26,10 +26,12 @@ func RunAlbum(w *Window, ax []byte) {
 				w.Goto(album.Back)
 			}
 		})
-		w.OnSwipe(func(d Direction) {
+		w.OnSwipe(func(d Direction) bool {
 			if d == Down {
 				w.Goto(album.Back)
+				return true
 			}
+			return false
 		})
 	}
 	w.Wait()

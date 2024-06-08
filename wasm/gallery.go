@@ -133,7 +133,7 @@ func (g *Gallery) Resize() {
 }
 
 // Swipe handles a touch swipe action
-func (g *Gallery) Swipe(d Direction) {
+func (g *Gallery) Swipe(d Direction) bool {
 	if g.imagePage {
 		switch d {
 		case Down:
@@ -142,6 +142,8 @@ func (g *Gallery) Swipe(d Direction) {
 			g.ImageDisplay(g.curImage - 1)
 		case Left:
 			g.ImageDisplay(g.curImage + 1)
+		default:
+			return false
 		}
 	} else {
 		perPage := g.rows * g.cols
@@ -154,8 +156,11 @@ func (g *Gallery) Swipe(d Direction) {
 			g.SelectThumb(g.curImage - perPage)
 		case Left:
 			g.SelectThumb(g.curImage + perPage)
+		default:
+			return false
 		}
 	}
+	return true
 }
 
 // KeyPress handles keyboard shortcuts
