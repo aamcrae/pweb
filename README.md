@@ -166,7 +166,7 @@ The directives are:
 | download | | | Allow the original images to be downloaded via a link in the generated web pages. Also, unless ```nozip``` is set, create a ```photos.zip``` file containing all of the photos in the gallery, and provide a link to download this zip file.|
 | nozip | | | If set, do not generate a ```photos.zip``` file for download.|
 | sort | date | date | Only one argument is supported, ```date```, which will sort the images by date. The date used is extracted from the EXIF of the image, or the modification time if no EXIF date is available. By default the images are placed in the order they are included.|
-| reverse | | | If set, add the link to this gallery to the start of the list in the referring album; otherwise, the link to the gallery will be placed at the end of the album list.|
+| reverse | | | If set, add the link to this gallery to the end of the list in the referring album; otherwise, the link to the gallery will be placed at the start of the album list. By default, album entries are considered to be newest first. By using ```reverse```, newer entries are placed at the end. Typically this is done when processing a set of galleries that are associated together, and the processing is done in chronological order (with the album entries also put in chronological order).
 | caption | file title | img1234.jpg Nice flowers | Use this title string for the caption on the image; any EXIF captions are ignored.|
 | large | | | If set, generate a larger image to be displayed for the image. Default image size is 1500 x 1200, large image size is 1800 x 1500.|
 | nocaption | | | If set, do not generate captions for the images.|
