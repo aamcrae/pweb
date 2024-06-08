@@ -5,6 +5,7 @@ PORT := 8200
 WEB := /tmp/pweb
 ASSETS := ${WEB}/pweb
 GOROOT := $(shell go env GOROOT)
+TINYGOROOT := $(shell tinygo env TINYGOROOT)
 
 all: dir assets photos
 
@@ -16,13 +17,14 @@ photos: dir
 
 assets: dir go # tinygo
 	cp ../assets/css/*  ${ASSETS}
-	cp ${GOROOT}/misc/wasm/wasm_exec.js ${ASSETS}
 
 tinygo:
 	(cd ../wasm; tinygo build -o ${ASSETS}/pweb.wasm -target wasm)
+	cp ${TINYGOROOT}/targets/wasm_exec.js ${ASSETS} # wasm_exec_tiny.js
 
 go:
 	(cd ../wasm; GOOS=js GOARCH=wasm go build -o ${ASSETS}/pweb.wasm)
+	cp ${GOROOT}/misc/wasm/wasm_exec.js ${ASSETS}
 
 dir:
 	mkdir -p ${ASSETS}

@@ -10,17 +10,17 @@ func main() {
 	// Try to concurrently load both album.xml and gallery.xml
 	var wg sync.WaitGroup
 	wg.Add(2)
+	w := GetWindow()
 	var aData, gData []byte
 	go func() {
-		aData, _ = GetContent(data.AlbumFile)
+		aData, _ = w.GetContent(data.AlbumFile)
 		wg.Done()
 	}()
 	go func() {
-		gData, _ = GetContent(data.GalleryFile)
+		gData, _ = w.GetContent(data.GalleryFile)
 		wg.Done()
 	}()
-	w := GetWindow()
-	wg.Wait()
+	 wg.Wait()
 	if len(aData) > 0 {
 		RunAlbum(w, aData)
 	} else if len(gData) > 0 {

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"syscall/js"
@@ -27,6 +29,7 @@ const (
 // Window is the main structure for interfacing to the browser
 type Window struct {
 	window, document, head, body js.Value
+	href *url.URL
 	Width, Height                int
 	// touch values
 	startTime time.Time
@@ -42,6 +45,10 @@ func GetWindow() *Window {
 	w.document = w.window.Get("document")
 	w.head = w.document.Get("head")
 	w.body = w.document.Get("body")
+	u, err := url.Parse(w.window.Get("location").Get("href").String())
+	if err == nil {
+		w.href = u
+	}
 	w.refreshSize()
 	return w
 }
@@ -95,7 +102,6 @@ func (w *Window) OnSwipe(f func(Direction) bool) {
 	touchStartJS := js.FuncOf(func(this js.Value, args []js.Value) any {
 		t := args[0].Get("touches")
 		if t.IsUndefined() {
-			fmt.Printf("cannot find touches\n")
 			return nil
 		}
 		w.startTime = time.Now()
@@ -110,7 +116,6 @@ func (w *Window) OnSwipe(f func(Direction) bool) {
 	touchMoveJS := js.FuncOf(func(this js.Value, args []js.Value) any {
 		e := args[0].Get("targetTouches")
 		if e.IsUndefined() {
-			fmt.Printf("targetTouches is undefined\n")
 			return nil
 		}
 		if e.Length() == 1 {
@@ -209,8 +214,23 @@ func (w *Window) Wait() {
 }
 
 // GetContent retrieves a file from the server
-func GetContent(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+func (w *Window) GetContent(dest string) ([]byte, error) {
+	u, err := url.Parse(dest)
+	if err != nil {
+		return nil, err
+	}
+	// If no scheme provided, assume using current href.
+	if u.Scheme == "" && w.href != nil {
+		if strings.HasPrefix(dest, "/") {
+			// Absolute path, copy current href and override path
+			baseU := *w.href
+			baseU.Path = ""
+			u = baseU.JoinPath(dest)
+		} else {
+			u = w.href.JoinPath(dest)
+		}
+	}
+	resp, err := http.DefaultClient.Get(u.String())
 	if err != nil {
 		return nil, fmt.Errorf("GET error: %v", err)
 	}
@@ -224,7 +244,6 @@ func GetContent(url string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Read body: %v", err)
 	}
-
 	return data, nil
 }
 

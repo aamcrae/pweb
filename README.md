@@ -201,3 +201,10 @@ cp ${GOROOT}/misc/wasm/wasm_exec.js /var/www/html/pweb
 If image downloading is configured, download links are generated as symlinks to the
 original files, and your web server must be configured to allow the following of the symlinks
 to access the file (e.g for apache2, ```Options FollowSymLinks``` must be set for the photos directory).
+
+## tinygo
+
+The WASM binary built with the standard Go compiler is quite large, over 8.5Mb. Attempts have been made
+to use tinygo to build and run pweb, but there are issues and problems with some packages (e.g net/http).
+It may be possible to avoid using net/http, and instead interface directly to Javascript functions
+to retrieve content. This is a TODO.
