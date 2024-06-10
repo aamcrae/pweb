@@ -365,7 +365,7 @@ func (g *Gallery) HeaderDownload(title, back, download string) string {
 		c.WriteString(A(Close()))
 	}
 	if download != "" {
-		c.WriteString(Span(hSpace, A(Href(download), rune(0x21A7))))
+		c.WriteString(Span(hSpace, A(Download(), Href(download), rune(0x21A7))))
 	}
 	c.WriteString(H1(Close()))
 	return c.String()
