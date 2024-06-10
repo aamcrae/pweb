@@ -67,7 +67,7 @@ func (p *Pict) GetExif() *Exif {
 }
 
 // AddGallery adds this picture to the gallery XML structure.
-func (p *Pict) AddToGallery(g *data.Gallery, download bool) {
+func (p *Pict) AddToGallery(g *data.Gallery, download int) {
 	var ph data.Photo
 	exif := p.GetExif()
 	ph.Name = p.baseName
@@ -81,7 +81,7 @@ func (p *Pict) AddToGallery(g *data.Gallery, download bool) {
 	ph.ISO = exif.iso
 	ph.Aperture = exif.fstop
 	ph.FocalLength = exif.focal_len
-	if download {
+	if download != DL_NONE {
 		ph.Download = p.dlFile
 	}
 	g.Photos = append(g.Photos, ph)

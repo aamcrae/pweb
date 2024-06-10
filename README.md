@@ -67,9 +67,14 @@ A typical web site directory layout may be:
            usa
              |_ index.html
                 gallery.xml
+                  |_ t
+                  |_ p
+                  |_ d
            australia
              |_ index.html
                 gallery.xml
+                  |_ t
+                  |_ p
        family
         |_ index.html
            album.xml
@@ -81,6 +86,9 @@ A typical web site directory layout may be:
 Each directory either contains an album or a gallery. The directory layout
 basically follows the navigation layout of the web site (clicking on albums or galleries will
 step to that directory).
+
+Gallery directories have subdirectories created for thumbnails (```t```), medium sized preview images (```p```)
+and if configured, download (```d```). These directories are created or removed as necessary.
 
 The [index.html](assets/index.html) file is used for both albums and galleries, and is
 basically just used for loading the web assembly program.
@@ -163,7 +171,7 @@ The directives are:
 | before | file filenames | img_4321.jpg other/*.jpg | Similar to ```after``` except the files are placed immediately before the file selected.|
 | rating | 0 - 5 | 3 | Selects images that have a XMP rating this value or higher. Images that have XMP Rating metadata or with rating values less than the selected value are excluded.|
 | select | 0 - 5 | 2 4 5| Selects images where the XMP rating matches one of the of rating values in the list. Only one of ```rating``` or ```select``` may be used, they are mutally exclusive.|
-| download | | | Allow the original images to be downloaded via a link in the generated web pages. Also, unless ```nozip``` is set, create a ```photos.zip``` file containing all of the photos in the gallery, and provide a link to download this zip file.|
+| download | static,symlink | | Allow the original images to be downloaded via a link in the generated web pages. Also, unless ```nozip``` is set, create a ```photos.zip``` file containing all of the photos in the gallery, and provide a link to download this zip file. No argument or ```symlink``` will use symlinks to the original. ```static``` will place a copy of the original image into the download directory.|
 | nozip | | | If set, do not generate a ```photos.zip``` file for download.|
 | sort | date | date | Only one argument is supported, ```date```, which will sort the images by date. The date used is extracted from the EXIF of the image, or the modification time if no EXIF date is available. By default the images are placed in the order they are included.|
 | reverse | | | If set, add the link to this gallery to the end of the list in the referring album; otherwise, the link to the gallery will be placed at the start of the album list. By default, album entries are considered to be newest first. By using ```reverse```, newer entries are placed at the end. Typically this is done when processing a set of galleries that are associated together, and the processing is done in chronological order (with the album entries also put in chronological order).
@@ -191,16 +199,18 @@ To install ```pweb```:
 cp assets/*.xml assets/*.html /usr/share/pweb
 cp assets/css/* /var/www/html/pweb
 ```
-- Build and install the WASM support and binaries:
+- Build and install the WASM support and binaries (optionally, tinygo can be used - see below):
 ```
 (cd wasm; GOOS=js GOARCH=wasm go build -o /var/www/html/pweb/pweb.wasm)
 cp $(go env GOROOT)/misc/wasm/wasm_exec.js /var/www/html/pweb
 ```
 - The album-template.xml and gallery-template.xml files may be customised to add a copyright owner.
 
-If image downloading is configured, download links are generated as symlinks to the
+If image downloading with symlinks is configured, download links are generated as symlinks to the
 original files, and your web server must be configured to allow the following of the symlinks
 to access the file (e.g for apache2, ```Options FollowSymLinks``` must be set for the photos directory).
+If download is configured as ```static```, a copy of the image is placed into the download directory, which
+is useful if the web site is going to be copied/synced to a separate server.
 
 ## tinygo
 
@@ -212,4 +222,4 @@ To build the wasm binary with tinygo:
 cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js /var/www/html/pweb
 ```
 
-It is important that the appropriate wasm_exec.js file is installed for whichever compiler is used.
+It is important that the appropriate ```wasm_exec.js``` file is installed for whichever compiler is used.

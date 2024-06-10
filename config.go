@@ -49,7 +49,7 @@ var configKeywords = map[string]*configOptions{
 	"before":    &configOptions{code: C_BEFORE, min: 2, multi: true},
 	"rating":    &configOptions{code: C_RATING, min: 1, max: 1},
 	"select":    &configOptions{code: C_SELECT, min: 1, max: 6},
-	"download":  &configOptions{code: C_DOWNLOAD},
+	"download":  &configOptions{code: C_DOWNLOAD, max: 1},
 	"nocaption": &configOptions{code: C_NOCAPTION},
 	"sort":      &configOptions{code: C_SORT, min: 1, max: 1},
 	"reverse":   &configOptions{code: C_REVERSE},

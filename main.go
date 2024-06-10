@@ -21,6 +21,12 @@ const (
 	previewHeight = 240
 )
 
+const (
+	DL_NONE = iota
+	DL_SYMLINK
+	DL_STATIC
+)
+
 var thumbWidth int = 160
 var thumbHeight int = 160
 var imageWidth int = 1500
@@ -186,12 +192,25 @@ func main() {
 	if upConfigured {
 		UpdateAlbum(up[0], *baseDir, dir, title, reverse)
 	}
-	_, download := conf[C_DOWNLOAD]
+	download := DL_NONE
+	if dl_arg, ok := conf[C_DOWNLOAD]; ok {
+		switch dl_arg[0] {
+		case "", "symlink":
+			download = DL_SYMLINK
+		case "static":
+			download = DL_STATIC
+		default:
+			log.Fatalf("Unknown download argument: %s", dl_arg[0])
+		}
+	}
 	_, nozip := conf[C_NOZIP]
 	// Ensure base page, thumbnail, preview and (optionally) download directories exist.
 	makeDirs(destDir, path.Join(destDir, "t"), path.Join(destDir, "p"))
-	if download {
-		dlDir := path.Join(destDir, "d")
+	dlDir := path.Join(destDir, "d")
+	if download == DL_NONE {
+		// Remove any download directory
+		os.RemoveAll(dlDir)
+	} else {
 		makeDirs(dlDir)
 		// If there is a .htaccess file required, copy it.
 		if err := cpMaybe(path.Join(*assets, "download-htaccess"), path.Join(dlDir, ".htaccess")); err != nil {
@@ -202,7 +221,7 @@ func main() {
 	// Preload gallery XML from template (to set copyright etc.)
 	ReadXml(path.Join(*assets, data.TemplateGalleryFile), &g)
 	g.Title = title
-	if download && !nozip {
+	if download != DL_NONE && !nozip {
 		g.Download = path.Join("d", "photos.zip")
 	}
 	if upConfigured {
@@ -241,7 +260,7 @@ func main() {
 			log.Fatalf("%s: Write %v", gFile, err)
 		}
 	}
-	if download && !nozip {
+	if download != DL_NONE && !nozip {
 		updateZip(path.Join(destDir, "d"))
 	}
 	// Conditionally copy the main index.html file.
@@ -336,15 +355,37 @@ func buildRatings(ratings []string, ratingMap map[string]struct{}, scale bool) {
 	}
 }
 
-func resizePhotos(handler NewImage, picts []*Pict, download bool) {
+func resizePhotos(handler NewImage, picts []*Pict, download int) {
 	resizers := NewWorker(time.Second * time.Duration(*watchdog))
 	defer resizers.Wait()
 	for _, p := range picts {
 		resizers.Run(func() {
 			p.Resize(handler, thumbWidth, thumbHeight, previewWidth, previewHeight, imageWidth, imageHeight)
-			if download {
+			dlPath := path.Join(p.destDir, p.dlFile)
+			switch download {
+			case DL_STATIC:
+				// If the existing file is a symlink, remove it.
+				if st, err := os.Lstat(dlPath); err == nil {
+					if (st.Mode() & os.ModeSymlink) != 0 {
+						if err := os.Remove(dlPath); err != nil {
+							log.Fatalf("%s: %v", dlPath, err)
+						}
+					}
+				}
+				// Copy the original into the download directory.
+				if err := cpFile(p.srcPath, dlPath); err != nil {
+					log.Fatalf("%s: download copy: %v", dlPath, err)
+				}
+			case DL_SYMLINK:
+				// If regular file, remove it.
+				if st, err := os.Lstat(dlPath); err == nil {
+					if (st.Mode() & os.ModeSymlink) == 0 {
+						if err := os.Remove(dlPath); err != nil {
+							log.Fatalf("%s: %v", dlPath, err)
+						}
+					}
+				}
 				// create symlink in the download directory to the original file, if not already existing
-				dlPath := path.Join(p.destDir, p.dlFile)
 				if _, err := os.Stat(dlPath); err != nil {
 					if err := os.Symlink(p.srcPath, dlPath); err != nil {
 						log.Fatalf("%s: symlink %v", p.srcFile, err)
