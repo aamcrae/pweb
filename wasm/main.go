@@ -18,7 +18,7 @@ func main() {
 		RunGallery(w, gData)
 	} else {
 		w.SetTitle("No album or gallery")
-		w.Display(h.H1("No photo album or gallery!")
+		w.Display(h.H1("No photo album or gallery!"))
 	}
 }
 
