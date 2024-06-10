@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strings"
 	"time"
 
 	"syscall/js"
@@ -29,7 +27,6 @@ const (
 // Window is the main structure for interfacing to the browser
 type Window struct {
 	window, document, head, body js.Value
-	href *url.URL
 	Width, Height                int
 	// touch values
 	startTime time.Time
@@ -45,10 +42,6 @@ func GetWindow() *Window {
 	w.document = w.window.Get("document")
 	w.head = w.document.Get("head")
 	w.body = w.document.Get("body")
-	u, err := url.Parse(w.window.Get("location").Get("href").String())
-	if err == nil {
-		w.href = u
-	}
 	w.refreshSize()
 	return w
 }
@@ -214,25 +207,10 @@ func (w *Window) Wait() {
 }
 
 // GetContent retrieves a file from the server
-func (w *Window) GetContent(dest string) ([]byte, error) {
-	u, err := url.Parse(dest)
+func (w *Window) GetContent(file string) ([]byte, error) {
+	resp, err := http.Get(file)
 	if err != nil {
 		return nil, err
-	}
-	// If no scheme provided, assume using current href.
-	if u.Scheme == "" && w.href != nil {
-		if strings.HasPrefix(dest, "/") {
-			// Absolute path, copy current href and override path
-			baseU := *w.href
-			baseU.Path = ""
-			u = baseU.JoinPath(dest)
-		} else {
-			u = w.href.JoinPath(dest)
-		}
-	}
-	resp, err := http.DefaultClient.Get(u.String())
-	if err != nil {
-		return nil, fmt.Errorf("GET error: %v", err)
 	}
 	defer resp.Body.Close()
 
@@ -242,7 +220,7 @@ func (w *Window) GetContent(dest string) ([]byte, error) {
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Read body: %v", err)
+		return nil, err
 	}
 	return data, nil
 }

@@ -103,8 +103,8 @@ func newGallery(xmlData *data.Gallery, w *Window) *Gallery {
 			iso:      entry.ISO,
 			flen:     entry.FocalLength}
 		var ct Comp
-		ct.Wr(fmt.Sprintf("<div class=\"holder\"><div id=\"slide%d\" class=\"slideshow\">", i))
-		ct.Wr(fmt.Sprintf("<a onclick=\"return showPict(%d)\" href=\"#\">", i))
+		ct.Wr("<div class=\"holder\"><div id=\"slide").Wr(i).Wr("\" class=\"slideshow\">")
+		ct.Wr("<a onclick=\"return showPict(").Wr(i).Wr(")\" href=\"#\">")
 		ct.Wr("<img src=\"t/").Wr(img.filename).Wr("\" title=\"").Wr(img.title).Wr("\">")
 		ct.Wr("</a>")
 		if len(img.title) > 0 {
