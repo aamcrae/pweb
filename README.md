@@ -215,10 +215,10 @@ is useful if the web site is going to be copied/synced to a separate server.
 ## tinygo
 
 The WASM binary built with the standard Go compiler is quite large, over 8.5Mb.
-[Tinygo](https://tinygo.org/) can be used instead, reducing to size to under 1Mb.
+[Tinygo](https://tinygo.org/) can be used instead, reducing the size to under 400Kb.
 To build the wasm binary with tinygo:
 ```
-(cd wasm; tinygo build -target wasm -o /var/www/html/pweb/pweb.wasm)
+(cd wasm; tinygo build -target wasm -no-debug -o /var/www/html/pweb/pweb.wasm)
 cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js /var/www/html/pweb
 ```
 
