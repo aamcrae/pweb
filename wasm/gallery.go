@@ -8,6 +8,7 @@ import (
 	"syscall/js"
 
 	"github.com/aamcrae/pweb/data"
+	h "github.com/aamcrae/wasm"
 )
 
 const (
@@ -37,7 +38,7 @@ type Image struct {
 
 // Gallery holds the collection of images that form a photo gallery
 type Gallery struct {
-	w          *Window
+	w          *h.Window
 	title      string   // Title of gallery
 	header     string   // HTML of title of page
 	back string // Referring link
@@ -53,13 +54,13 @@ type Gallery struct {
 	images     []*Image // slice of images in the gallery
 }
 
-func RunGallery(w *Window, gx []byte) {
+func RunGallery(w *h.Window, gx []byte) {
 	w.LoadStyle("/pweb/gallery-style.css")
 	var gallery data.Gallery
 	err := xml.Unmarshal(gx, &gallery)
 	if err != nil {
 		fmt.Printf("unmarshal: %v\n", err)
-		w.Display(H1("Bad or no gallery data!"))
+		w.Display(h.H1("Bad or no gallery data!"))
 		return
 	}
 	g := newGallery(&gallery, w)
@@ -74,7 +75,7 @@ func RunGallery(w *Window, gx []byte) {
 }
 
 // newGallery creates a new gallery from the XML data provided.
-func newGallery(xmlData *data.Gallery, w *Window) *Gallery {
+func newGallery(xmlData *data.Gallery, w *h.Window) *Gallery {
 	g := &Gallery{w: w,
 		title: xmlData.Title,
 		back: xmlData.Back,
@@ -102,16 +103,16 @@ func newGallery(xmlData *data.Gallery, w *Window) *Gallery {
 			iso:      entry.ISO,
 			flen:     entry.FocalLength}
 		img.thumbEntry = 
-			Div(Class("holder"),
-				Div(Class("slideshow"), Id(Text("slide", i)),
-				A(Onclick(Text("return showPict(", i, ")")),
-					Href("#"),
-					Img(Title(img.title), Src(Text("t/", img.filename)))),
-				Div(If(len(img.title) > 0), Class("thumbName"), img.title)))
+			h.Div(h.Class("holder"),
+				h.Div(h.Class("slideshow"), h.Id(h.Text("slide", i)),
+				h.A(h.Onclick(h.Text("return showPict(", i, ")")),
+					h.Href("#"),
+					h.Img(h.Title(img.title), h.Src(h.Text("t/", img.filename)))),
+				h.Div(h.If(len(img.title) > 0), h.Class("thumbName"), img.title)))
 		g.images = append(g.images, img)
 	}
 	// Install some style elements now that we know the thumbnail sizes
-	g.w.AddStyle(Text(".holder {width:", g.tw + 10, "px;height:", g.th + 30, "px} .thumbName{width:", g.tw + 10, "px}"))
+	g.w.AddStyle(h.Text(".holder {width:", g.tw + 10, "px;height:", g.th + 30, "px} .thumbName{width:", g.tw + 10, "px}"))
 	return g
 }
 
@@ -126,14 +127,14 @@ func (g *Gallery) Resize() {
 }
 
 // Swipe handles a touch swipe action
-func (g *Gallery) Swipe(d Direction) bool {
+func (g *Gallery) Swipe(d h.Direction) bool {
 	if g.imagePage {
 		switch d {
-		case Down:
+		case h.Down:
 			g.SelectThumb(g.curImage)
-		case Right:
+		case h.Right:
 			g.ImageDisplay(g.curImage - 1)
-		case Left:
+		case h.Left:
 			g.ImageDisplay(g.curImage + 1)
 		default:
 			return false
@@ -141,13 +142,13 @@ func (g *Gallery) Swipe(d Direction) bool {
 	} else {
 		perPage := g.rows * g.cols
 		switch d {
-		case Down:
+		case h.Down:
 			if len(g.back) > 0 {
 				g.w.Goto(g.back)
 			}
-		case Right:
+		case h.Right:
 			g.SelectThumb(g.curImage - perPage)
-		case Left:
+		case h.Left:
 			g.SelectThumb(g.curImage + perPage)
 		default:
 			return false
@@ -262,14 +263,14 @@ func (g *Gallery) ShowPage() {
 	nPages := (len(g.images) + perPage - 1) / perPage
 	curPage := g.curImage / perPage
 	if nPages > 1 {
-		c.WriteString(Div(Open(), Id("navlinks"), "Pages: "))
+		c.WriteString(h.Div(h.Open(), h.Id("navlinks"), "Pages: "))
 		for i := 0; i < nPages; i++ {
-			c.WriteString(g.LinkToPage(Text(i+1), i, i*perPage, Text(If(curPage == i), "current")))
+			c.WriteString(g.LinkToPage(h.Text(i+1), i, i*perPage, h.Text(h.If(curPage == i), "current")))
 		}
-		c.WriteString(Div(Close()))
+		c.WriteString(h.Div(h.Close()))
 	}
 	c.WriteString(g.header)
-	c.WriteString(Div(Id("thumbpage"), Open()))
+	c.WriteString(h.Div(h.Id("thumbpage"), h.Open()))
 	i := curPage * g.rows * g.cols
 	g.firstImage = i
 	for x := 0; x < g.rows; x++ {
@@ -279,11 +280,11 @@ func (g *Gallery) ShowPage() {
 				i++
 			}
 		}
-		c.WriteString(Br(Style("clear: left")))
+		c.WriteString(h.Br(h.Style("clear: left")))
 	}
 	g.lastImage = i - 1
-	c.WriteString(Div(Close()))
-	c.WriteString(Br(Style("clear: both")))
+	c.WriteString(h.Div(h.Close()))
+	c.WriteString(h.Br(h.Style("clear: both")))
 	c.WriteString(Copyright(g.owner))
 	g.w.Display(c.String())
 	g.updateThumb(g.curImage, thumbOn)
@@ -291,9 +292,9 @@ func (g *Gallery) ShowPage() {
 
 // LinkToPage generates HTML for a link to a thumbnail page.
 func (g *Gallery) LinkToPage(txt string, pageNo, index int, class string) string {
-	return A(Class(class), Id(If(pageNo >= 0), Text("navlink", pageNo)),
-			Onclick(Text("return showThumbs(", index, ")")),
-			Href("#"),
+	return h.A(h.Class(class), h.Id(h.If(pageNo >= 0), h.Text("navlink", pageNo)),
+			h.Onclick(h.Text("return showThumbs(", index, ")")),
+			h.Href("#"),
 			txt)
 }
 
@@ -302,7 +303,7 @@ func (g *Gallery) BuildPict(index int) {
 	img := g.images[index]
 	var c strings.Builder
 	g.LinkToPict(&c, "prev", index-1)
-	c.WriteString(Div(Id("home"), A(Onclick("return showThumbs(", index, ")"), Href("#"), "back to index")))
+	c.WriteString(h.Div(h.Id("home"), h.A(h.Onclick("return showThumbs(", index, ")"), h.Href("#"), "back to index")))
 	g.LinkToPict(&c, "next", index+1)
 	var t string
 	if len(img.title) > 0 {
@@ -311,70 +312,70 @@ func (g *Gallery) BuildPict(index int) {
 		t = g.title
 	}
 	c.WriteString(g.HeaderDownload(t, "", img.download))
-	c.WriteString(Div(Id("mainimage"), Img(Src(img.filename), Alt(t))))
+	c.WriteString(h.Div(h.Id("mainimage"), h.Img(h.Src(img.filename), h.Alt(t))))
 	// Show image properties etc.
-	c.WriteString(Div(Open(), Class("properties"), Table(Open(), Summary("image properties"), Border(0))))
+	c.WriteString(h.Div(h.Open(), h.Class("properties"), h.Table(h.Open(), h.Summary("image properties"), h.Border(0))))
 	c.WriteString(g.Property("Date", img.date))
 	c.WriteString(g.Property("Filename", img.name))
 	if img.original.Width != 0 && img.original.Height != 0 {
-		c.WriteString(g.Property("Original resolution", Text(img.original.Width, " x ", img.original.Height)))
+		c.WriteString(g.Property("Original resolution", h.Text(img.original.Width, " x ", img.original.Height)))
 	}
 	c.WriteString(g.Property("Exposure", img.exposure))
 	c.WriteString(g.Property("Aperture", img.aperture))
 	c.WriteString(g.Property("ISO", img.iso))
 	c.WriteString(g.Property("Focal length", img.flen))
-	c.WriteString(Table(Close()))
-	c.WriteString(Div(Close()))
+	c.WriteString(h.Table(h.Close()))
+	c.WriteString(h.Div(h.Close()))
 	c.WriteString(Copyright(g.owner))
 	img.imagePage = c.String()
 }
 
 // Property generates HTML for the image metadata (name, size etc.)
 func (g *Gallery) Property(n, val string) string {
-	return Tr(If(val != ""), Td(Class("exifname"), n), Td(Class("exifdata"), val))
+	return h.Tr(h.If(val != ""), h.Td(h.Class("exifname"), n), h.Td(h.Class("exifdata"), val))
 }
 
 // LinkToPict generates HTML for a link to the selected picture.
 func (g *Gallery) LinkToPict(c *strings.Builder, n string, index int) {
-	c.WriteString(Div(Open(), Id(n)))
+	c.WriteString(h.Div(h.Open(), h.Id(n)))
 	if index < 0 || index == len(g.images) {
 		c.WriteString("&nbsp")
 	} else {
-		c.WriteString(A(Open(), Onclick("return showPict(", index, ")"), Href("#")))
+		c.WriteString(h.A(h.Open(), h.Onclick("return showPict(", index, ")"), h.Href("#")))
 		if len(g.images[index].title) == 0 {
 			c.WriteString(g.images[index].name)
 		} else {
 			c.WriteString(g.images[index].title)
 		}
-		c.WriteString(A(Close()))
+		c.WriteString(h.A(h.Close()))
 	}
-	c.WriteString(Div(Close()))
+	c.WriteString(h.Div(h.Close()))
 }
 
 func (g *Gallery) HeaderDownload(title, back, download string) string {
 	var c strings.Builder
-	c.WriteString(H1(Open()))
+	c.WriteString(h.H1(h.Open()))
 	if download != "" {
 		c.WriteString(hSpace)
 	}
 	if back != "" {
-		c.WriteString(A(Open(), Href(back)))
+		c.WriteString(h.A(h.Open(), h.Href(back)))
 	}
 	c.WriteString(title)
 	if back != "" {
-		c.WriteString(A(Close()))
+		c.WriteString(h.A(h.Close()))
 	}
 	if download != "" {
-		c.WriteString(Span(hSpace, A(Download(), Href(download), rune(0x21A7))))
+		c.WriteString(h.Span(hSpace, h.A(h.Download(), h.Href(download), rune(0x21A7))))
 	}
-	c.WriteString(H1(Close()))
+	c.WriteString(h.H1(h.Close()))
 	return c.String()
 }
 
 // updateThumb sets the class for the selected image (used to
 // highlight the current image).
 func (g *Gallery) updateThumb(i int, cl string) {
-	id := Text("slide", i)
+	id := h.Text("slide", i)
 	current := g.w.GetById(id)
 	if current.IsUndefined() || current.IsNull() {
 		fmt.Printf("Can't find %s\n", id)

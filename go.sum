@@ -1,3 +1,5 @@
+github.com/aamcrae/wasm v0.0.0-20240610114737-a95385c3e048 h1:z+Qe5Egf0uhZUdslkyTN7e1DXPaoDUvDiz3yTdDYDPE=
+github.com/aamcrae/wasm v0.0.0-20240610114737-a95385c3e048/go.mod h1:BXPy+SNKO0BlzDh7I3kEgHheWe85NLL7m1NA2Et/WQE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
