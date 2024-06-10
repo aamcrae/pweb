@@ -58,9 +58,7 @@ func RunGallery(w *Window, gx []byte) {
 	err := xml.Unmarshal(gx, &gallery)
 	if err != nil {
 		fmt.Printf("unmarshal: %v\n", err)
-		var c Comp
-		c.Wr("<h1>Bad or no gallery data!</h1>")
-		w.Display(c.String())
+		w.Display(H1("Bad or no gallery data!"))
 		return
 	}
 	g := newGallery(&gallery, w)
@@ -102,16 +100,13 @@ func newGallery(xmlData *data.Gallery, w *Window) *Gallery {
 			exposure: entry.Exposure,
 			iso:      entry.ISO,
 			flen:     entry.FocalLength}
-		var ct Comp
-		ct.Wr("<div class=\"holder\"><div id=\"slide").Wr(i).Wr("\" class=\"slideshow\">")
-		ct.Wr("<a onclick=\"return showPict(").Wr(i).Wr(")\" href=\"#\">")
-		ct.Wr("<img src=\"t/").Wr(img.filename).Wr("\" title=\"").Wr(img.title).Wr("\">")
-		ct.Wr("</a>")
-		if len(img.title) > 0 {
-			ct.Wr("<div class=thumbName>").Wr(img.title).Wr("</div>")
-		}
-		ct.Wr("</div> </div>")
-		img.thumbEntry = ct.String()
+		img.thumbEntry = 
+			Div(Class("holder"),
+				Div(Class("slideshow"), Id(Text("slide", i)),
+				A(Onclick(Text("return showPict(", i, ")")),
+					Href("#"),
+					Img(Title(img.title), Src(Text("t/", img.filename)))),
+				Div(If(len(img.title) > 0), Class("thumbName"), img.title)))
 		g.images = append(g.images, img)
 	}
 	// Install some style elements now that we know the thumbnail sizes
@@ -269,18 +264,14 @@ func (g *Gallery) ShowPage() {
 	nPages := (len(g.images) + perPage - 1) / perPage
 	curPage := g.curImage / perPage
 	if nPages > 1 {
-		c.Wr("<div id=\"navlinks\">Pages: ")
+		c.Wr(Div(Open(), Id("navlinks"), "Pages: "))
 		for i := 0; i < nPages; i++ {
-			class := ""
-			if curPage == i {
-				class = "current"
-			}
-			g.LinkToPage(c, fmt.Sprintf("%d", i+1), i, i*perPage, class)
+			g.LinkToPage(c, Text(i+1), i, i*perPage, Text(If(curPage == i), "current"))
 		}
-		c.Wr("</div>")
+		c.Wr(Div(Close()))
 	}
 	c.Wr(g.header)
-	c.Wr("<div id=\"thumbpage\">")
+	c.Wr(Div(Id("thumbpage"), Open()))
 	i := curPage * g.rows * g.cols
 	g.firstImage = i
 	for x := 0; x < g.rows; x++ {
@@ -290,10 +281,11 @@ func (g *Gallery) ShowPage() {
 				i++
 			}
 		}
-		c.Wr("<br style=\"clear: left\" />\n")
+		c.Wr(Br(Style("clear: left")))
 	}
 	g.lastImage = i - 1
-	c.Wr("</div><br style=\"clear: both\" />\n")
+	c.Wr(Div(Close()))
+	c.Wr(Br(Style("clear: both")))
 	Copyright(c, g.owner)
 	g.w.Display(c.String())
 	g.updateThumb(g.curImage, thumbOn)
@@ -301,11 +293,10 @@ func (g *Gallery) ShowPage() {
 
 // LinkToPage generates HTML for a link to a thumbnail page.
 func (g *Gallery) LinkToPage(c *Comp, txt string, pageNo, index int, class string) {
-	c.Wr("<a class=\"").Wr(class).Wr("\" ")
-	if pageNo >= 0 {
-		c.Wr("id=\"navlink").Wr(pageNo).Wr("\" ")
-	}
-	c.Wr("onclick=\"return showThumbs(").Wr(index).Wr(")\" href=\"#\">").Wr(txt).Wr("</a>")
+	c.Wr(A(Class(class), Id(If(pageNo >= 0), Text("navlink", pageNo)),
+			Onclick(Text("return showThumbs(", index, ")")),
+			Href("#"),
+			txt))
 }
 
 // BuildPict creates the full page HTML for this image
@@ -348,45 +339,45 @@ func (g *Gallery) Property(c *Comp, n, val string) {
 
 // LinkToPict generates HTML for a link to the selected picture.
 func (g *Gallery) LinkToPict(c *Comp, n string, index int) {
-	c.Wr("<div id=\"").Wr(n).Wr("\">")
+	c.Wr(Div(Open(), Id(n)))
 	if index < 0 || index == len(g.images) {
 		c.Wr("&nbsp")
 	} else {
-		c.Wr("<a onclick=\"return showPict(").Wr(index).Wr(")\" href=\"#\">")
+		c.Wr(A(Open(), Onclick("return showPict(", index, ")"), Href("#")))
 		if len(g.images[index].title) == 0 {
 			c.Wr(g.images[index].name)
 		} else {
 			c.Wr(g.images[index].title)
 		}
-		c.Wr("</a>")
+		c.Wr(A(Close()))
 	}
-	c.Wr("</div>")
+	c.Wr(Div(Close()))
 }
 
 func (g *Gallery) HeaderDownload(title, back, download string) string {
 	c := new(Comp)
-	c.Wr("<h1>")
+	c.Wr(H1(Open()))
 	if download != "" {
 		c.Wr(hSpace)
 	}
 	if back != "" {
-		c.Wr("<a href=\"").Wr(back).Wr("\">")
+		c.Wr(A(Open(), Href(back)))
 	}
 	c.Wr(title)
 	if back != "" {
-		c.Wr("</a>")
+		c.Wr(A(Close()))
 	}
 	if download != "" {
-		c.Wr("<span>").Wr(hSpace).Wr("<a href=\"").Wr(download).Wr("\">").Wr(rune(0x21A7)).Wr("</a></span>")
+		c.Wr(Span(hSpace, A(Href(download), rune(0x21A7))))
 	}
-	c.Wr("</h1>")
+	c.Wr(H1(Close()))
 	return c.String()
 }
 
 // updateThumb sets the class for the selected image (used to
 // highlight the current image).
 func (g *Gallery) updateThumb(i int, cl string) {
-	id := fmt.Sprintf("slide%d", i)
+	id := Text("slide", i)
 	current := g.w.GetById(id)
 	if current.IsUndefined() || current.IsNull() {
 		fmt.Printf("Can't find %s\n", id)
