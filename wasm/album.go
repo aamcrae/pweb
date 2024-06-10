@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/xml"
-	"fmt"
 	"strings"
 
 	"github.com/aamcrae/pweb/data"
@@ -14,7 +13,6 @@ func RunAlbum(w *h.Window, ax []byte) {
 	var album data.AlbumPage
 	err := xml.Unmarshal(ax, &album)
 	if err != nil {
-		fmt.Printf("unmarshal: %v\n", err)
 		w.Display(h.H1("Bad album data!"))
 		return
 	}

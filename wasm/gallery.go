@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/xml"
-	"fmt"
 	"strings"
 
 	"syscall/js"
@@ -59,7 +58,6 @@ func RunGallery(w *h.Window, gx []byte) {
 	var gallery data.Gallery
 	err := xml.Unmarshal(gx, &gallery)
 	if err != nil {
-		fmt.Printf("unmarshal: %v\n", err)
 		w.Display(h.H1("Bad or no gallery data!"))
 		return
 	}
@@ -376,12 +374,7 @@ func (g *Gallery) HeaderDownload(title, back, download string) string {
 // highlight the current image).
 func (g *Gallery) updateThumb(i int, cl string) {
 	id := h.Text("slide", i)
-	current := g.w.GetById(id)
-	if current.IsUndefined() || current.IsNull() {
-		fmt.Printf("Can't find %s\n", id)
-	} else {
-		current.Set("className", js.ValueOf(cl))
-	}
+	g.w.GetById(id).Set("className", js.ValueOf(cl))
 }
 
 // tableSize returns the column and row count for the thumbnail page.
