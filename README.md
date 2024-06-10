@@ -194,7 +194,7 @@ cp assets/css/* /var/www/html/pweb
 - Build and install the WASM support and binaries:
 ```
 (cd wasm; GOOS=js GOARCH=wasm go build -o /var/www/html/pweb/pweb.wasm)
-cp ${GOROOT}/misc/wasm/wasm_exec.js /var/www/html/pweb
+cp $(go env GOROOT)/misc/wasm/wasm_exec.js /var/www/html/pweb
 ```
 - The album-template.xml and gallery-template.xml files may be customised to add a copyright owner.
 
@@ -204,7 +204,12 @@ to access the file (e.g for apache2, ```Options FollowSymLinks``` must be set fo
 
 ## tinygo
 
-The WASM binary built with the standard Go compiler is quite large, over 8.5Mb. Attempts have been made
-to use tinygo to build and run pweb, but there are issues and problems with some packages (e.g net/http).
-It may be possible to avoid using net/http, and instead interface directly to Javascript functions
-to retrieve content. This is a TODO.
+The WASM binary built with the standard Go compiler is quite large, over 8.5Mb.
+[Tinygo](https://tinygo.org/) can be used instead, reducing to size to under 1Mb.
+To build the wasm binary with tinygo:
+```
+(cd wasm; tinygo build -target wasm -o /var/www/html/pweb/pweb.wasm)
+cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js /var/www/html/pweb
+```
+
+It is important that the appropriate wasm_exec.js file is installed for whichever compiler is used.

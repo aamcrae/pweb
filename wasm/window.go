@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
-	"net/http"
 	"time"
 
 	"syscall/js"
@@ -206,23 +203,9 @@ func (w *Window) Wait() {
 	<-c
 }
 
-// GetContent retrieves a file from the server
-func (w *Window) GetContent(file string) ([]byte, error) {
-	resp, err := http.Get(file)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Status error: %v", resp.StatusCode)
-	}
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+func (w *Window) Fetch(file string) ([]byte, error) {
+	f := NewFetcher(w, file)
+	return f.Get()
 }
 
 // abs returns the absolute value of a value
