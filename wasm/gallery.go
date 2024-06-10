@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/xml"
 	"fmt"
+	"strings"
 
 	"syscall/js"
 
@@ -110,10 +111,7 @@ func newGallery(xmlData *data.Gallery, w *Window) *Gallery {
 		g.images = append(g.images, img)
 	}
 	// Install some style elements now that we know the thumbnail sizes
-	c := new(Comp)
-	c.Wr(".holder {width:").Wr(g.tw + 10).Wr("px;height:").Wr(g.th + 30).Wr("px}")
-	c.Wr(".thumbName{width:").Wr(g.tw + 10).Wr("px}")
-	g.w.AddStyle(c.String())
+	g.w.AddStyle(Text(".holder {width:", g.tw + 10, "px;height:", g.th + 30, "px} .thumbName{width:", g.tw + 10, "px}"))
 	return g
 }
 
@@ -257,120 +255,119 @@ func (g *Gallery) ShowThumbs(this js.Value, p []js.Value) any {
 // ShowPage displays the thumbnail page of the current image.
 func (g *Gallery) ShowPage() {
 	g.imagePage = false
-	c := new(Comp)
+	var c strings.Builder
 	g.w.SetTitle(g.title)
 	g.cols, g.rows = g.tableSize()
 	perPage := g.rows * g.cols
 	nPages := (len(g.images) + perPage - 1) / perPage
 	curPage := g.curImage / perPage
 	if nPages > 1 {
-		c.Wr(Div(Open(), Id("navlinks"), "Pages: "))
+		c.WriteString(Div(Open(), Id("navlinks"), "Pages: "))
 		for i := 0; i < nPages; i++ {
-			g.LinkToPage(c, Text(i+1), i, i*perPage, Text(If(curPage == i), "current"))
+			c.WriteString(g.LinkToPage(Text(i+1), i, i*perPage, Text(If(curPage == i), "current")))
 		}
-		c.Wr(Div(Close()))
+		c.WriteString(Div(Close()))
 	}
-	c.Wr(g.header)
-	c.Wr(Div(Id("thumbpage"), Open()))
+	c.WriteString(g.header)
+	c.WriteString(Div(Id("thumbpage"), Open()))
 	i := curPage * g.rows * g.cols
 	g.firstImage = i
 	for x := 0; x < g.rows; x++ {
 		for y := 0; y < g.cols; y++ {
 			if i < len(g.images) {
-				c.Wr(g.images[i].thumbEntry)
+				c.WriteString(g.images[i].thumbEntry)
 				i++
 			}
 		}
-		c.Wr(Br(Style("clear: left")))
+		c.WriteString(Br(Style("clear: left")))
 	}
 	g.lastImage = i - 1
-	c.Wr(Div(Close()))
-	c.Wr(Br(Style("clear: both")))
-	Copyright(c, g.owner)
+	c.WriteString(Div(Close()))
+	c.WriteString(Br(Style("clear: both")))
+	c.WriteString(Copyright(g.owner))
 	g.w.Display(c.String())
 	g.updateThumb(g.curImage, thumbOn)
 }
 
 // LinkToPage generates HTML for a link to a thumbnail page.
-func (g *Gallery) LinkToPage(c *Comp, txt string, pageNo, index int, class string) {
-	c.Wr(A(Class(class), Id(If(pageNo >= 0), Text("navlink", pageNo)),
+func (g *Gallery) LinkToPage(txt string, pageNo, index int, class string) string {
+	return A(Class(class), Id(If(pageNo >= 0), Text("navlink", pageNo)),
 			Onclick(Text("return showThumbs(", index, ")")),
 			Href("#"),
-			txt))
+			txt)
 }
 
 // BuildPict creates the full page HTML for this image
 func (g *Gallery) BuildPict(index int) {
 	img := g.images[index]
-	c := new(Comp)
-	g.LinkToPict(c, "prev", index-1)
-	c.Wr("<div id=\"home\"><a onclick=\"return showThumbs(").Wr(index).Wr(")\" href=\"#\">back to index</a></div>")
-	g.LinkToPict(c, "next", index+1)
+	var c strings.Builder
+	g.LinkToPict(&c, "prev", index-1)
+	c.WriteString(Div(Id("home"), A(Onclick("return showThumbs(", index, ")"), Href("#"), "back to index")))
+	g.LinkToPict(&c, "next", index+1)
 	var t string
 	if len(img.title) > 0 {
 		t = img.title
 	} else {
 		t = g.title
 	}
-	c.Wr(g.HeaderDownload(t, "", img.download))
-	c.Wr("<div id=\"mainimage\"><img src=\"").Wr(img.filename).Wr("\" alt=\"").Wr(t).Wr("\"></div>")
+	c.WriteString(g.HeaderDownload(t, "", img.download))
+	c.WriteString(Div(Id("mainimage"), Img(Src(img.filename), Alt(t))))
 	// Show image properties etc.
-	c.Wr("<div class=\"properties\"><table summary=\"image properties\" border=\"0\">")
-	g.Property(c, "Date", img.date)
-	g.Property(c, "Filename", img.name)
+	c.WriteString(Div(Open(), Class("properties"), Table(Open(), Summary("image properties"), Border(0))))
+	c.WriteString(g.Property("Date", img.date))
+	c.WriteString(g.Property("Filename", img.name))
 	if img.original.Width != 0 && img.original.Height != 0 {
-		g.Property(c, "Original resolution", fmt.Sprintf("%d x %d", img.original.Width, img.original.Height))
+		c.WriteString(g.Property("Original resolution", Text(img.original.Width, " x ", img.original.Height)))
 	}
-	g.Property(c, "Exposure", img.exposure)
-	g.Property(c, "Aperture", img.aperture)
-	g.Property(c, "ISO", img.iso)
-	g.Property(c, "Focal length", img.flen)
-	c.Wr("</table></div>")
-	Copyright(c, g.owner)
+	c.WriteString(g.Property("Exposure", img.exposure))
+	c.WriteString(g.Property("Aperture", img.aperture))
+	c.WriteString(g.Property("ISO", img.iso))
+	c.WriteString(g.Property("Focal length", img.flen))
+	c.WriteString(Table(Close()))
+	c.WriteString(Div(Close()))
+	c.WriteString(Copyright(g.owner))
 	img.imagePage = c.String()
 }
 
 // Property generates HTML for the image metadata (name, size etc.)
-func (g *Gallery) Property(c *Comp, n, val string) {
-	if val != "" {
-		c.Wr("<tr><td class=\"exifname\">").Wr(n).Wr("</td><td class=\"exifdata\">").Wr(val).Wr("</td></tr>")
-	}
+func (g *Gallery) Property(n, val string) string {
+	return Tr(If(val != ""), Td(Class("exifname"), n), Td(Class("exifdata"), val))
 }
 
 // LinkToPict generates HTML for a link to the selected picture.
-func (g *Gallery) LinkToPict(c *Comp, n string, index int) {
-	c.Wr(Div(Open(), Id(n)))
+func (g *Gallery) LinkToPict(c *strings.Builder, n string, index int) {
+	c.WriteString(Div(Open(), Id(n)))
 	if index < 0 || index == len(g.images) {
-		c.Wr("&nbsp")
+		c.WriteString("&nbsp")
 	} else {
-		c.Wr(A(Open(), Onclick("return showPict(", index, ")"), Href("#")))
+		c.WriteString(A(Open(), Onclick("return showPict(", index, ")"), Href("#")))
 		if len(g.images[index].title) == 0 {
-			c.Wr(g.images[index].name)
+			c.WriteString(g.images[index].name)
 		} else {
-			c.Wr(g.images[index].title)
+			c.WriteString(g.images[index].title)
 		}
-		c.Wr(A(Close()))
+		c.WriteString(A(Close()))
 	}
-	c.Wr(Div(Close()))
+	c.WriteString(Div(Close()))
 }
 
 func (g *Gallery) HeaderDownload(title, back, download string) string {
-	c := new(Comp)
-	c.Wr(H1(Open()))
+	var c strings.Builder
+	c.WriteString(H1(Open()))
 	if download != "" {
-		c.Wr(hSpace)
+		c.WriteString(hSpace)
 	}
 	if back != "" {
-		c.Wr(A(Open(), Href(back)))
+		c.WriteString(A(Open(), Href(back)))
 	}
-	c.Wr(title)
+	c.WriteString(title)
 	if back != "" {
-		c.Wr(A(Close()))
+		c.WriteString(A(Close()))
 	}
 	if download != "" {
-		c.Wr(Span(hSpace, A(Href(download), rune(0x21A7))))
+		c.WriteString(Span(hSpace, A(Href(download), rune(0x21A7))))
 	}
-	c.Wr(H1(Close()))
+	c.WriteString(H1(Close()))
 	return c.String()
 }
 

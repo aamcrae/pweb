@@ -8,25 +8,14 @@ import (
 	_ "syscall/js"
 )
 
-// Comp is a simple composer that understands the JS values
-type Comp struct {
-	strings.Builder
-}
-
 type Attr string
 type flag int
 
 const (
-	f_if flag = 1 << iota
+	f_drop flag = 1 << iota
 	f_no_open
 	f_no_close
 )
-
-// Wr writes the value to the string builder
-func (c *Comp) Wr(s any) *Comp {
-	wr(&c.Builder, s)
-	return c
-}
 
 func H1(elems ...any) string {
 	return tag("h1", elems)
@@ -56,6 +45,18 @@ func Span(elems ...any) string {
 	return tag("span", elems)
 }
 
+func Table(elems ...any) string {
+	return tag("table", elems)
+}
+
+func Tr(elems ...any) string {
+	return tag("tr", elems)
+}
+
+func Td(elems ...any) string {
+	return tag("td", elems)
+}
+
 func Br(elems ...any) string {
 	return emptyTag("br", elems)
 }
@@ -64,6 +65,73 @@ func P(elems ...any) string {
 	return emptyTag("p", elems)
 }
 
+// Attributes
+
+func Alt(s ...any) Attr {
+	return attr("alt", s)
+}
+
+func Title(s ...any) Attr {
+	return attr("title", s)
+}
+
+func Src(s ...any) Attr {
+	return attr("src", s)
+}
+
+func Onclick(s ...any) Attr {
+	return attr("onclick", s)
+}
+
+func Href(s ...any) Attr {
+	return attr("href", s)
+}
+
+func Border(s ...any) Attr {
+	return attr("border", s)
+}
+
+func Summary(s ...any) Attr {
+	return attr("summary", s)
+}
+
+func Class(s ...any) Attr {
+	return attr("class", s)
+}
+
+func Id(s ...any) Attr {
+	return attr("id", s)
+}
+
+func Style(s ...any) Attr {
+	return attr("style", s)
+}
+
+func Download(s ...any) Attr {
+	return attr("download", s)
+}
+
+func If(c bool) flag {
+	if !c {
+		return f_drop
+	} else {
+		return 0
+	}
+}
+
+func Open() flag {
+	return f_no_close
+}
+
+func Close() flag {
+	return f_no_open
+}
+
+func Text(s ...any) string {
+	var b strings.Builder
+	wrAll(&b, s, false)
+	return b.String()
+}
 func tag(nm string, elems []any) string {
 	return wrTag(nm, elems, false)
 }
@@ -74,7 +142,7 @@ func emptyTag(nm string, elems []any) string {
 
 func wrTag(nm string, elems []any, empty bool) string {
 	atrs, other, flags := unpack(elems)
-	if (flags & f_if) != 0 {
+	if (flags & f_drop) != 0 {
 		return ""
 	}
 	var sb strings.Builder
@@ -93,20 +161,16 @@ func wrTag(nm string, elems []any, empty bool) string {
 	return sb.String()
 }
 
-func wrAttr(nm string, elems []any) Attr {
+func attr(nm string, elems []any) Attr {
 	atrs, other, flags := unpack(elems)
-	if (flags & f_if) != 0 || len(atrs) > 0 || len(other) > 1 {
+	if (flags & f_drop) != 0 || len(atrs) > 0 {
 		return ""
 	}
 	var sb strings.Builder
 	sb.WriteRune(' ')
 	sb.WriteString(nm)
 	sb.WriteString("=\"")
-	if len(other) == 1 {
-		if v, ok := other[0].(string); ok {
-			sb.WriteString(v)
-		}
-	}
+	wrAll(&sb, other, false)
 	sb.WriteString("\"")
 	return Attr(sb.String())
 }
@@ -154,61 +218,4 @@ func wr(sb *strings.Builder, s any) {
 	default:
 		panic("wr: Unknown type")
 	}
-}
-
-func Alt(s ...any) Attr {
-	return wrAttr("alt", s)
-}
-
-func Title(s ...any) Attr {
-	return wrAttr("title", s)
-}
-
-func Src(s ...any) Attr {
-	return wrAttr("src", s)
-}
-
-func Onclick(s ...any) Attr {
-	return wrAttr("onclick", s)
-}
-
-func Href(s ...any) Attr {
-	return wrAttr("href", s)
-}
-
-func Class(s ...any) Attr {
-	return wrAttr("class", s)
-}
-
-func Id(s ...any) Attr {
-	return wrAttr("id", s)
-}
-
-func Style(s ...any) Attr {
-	return wrAttr("style", s)
-}
-
-func Download(s ...any) Attr {
-	return wrAttr("download", s)
-}
-
-func If(c bool) flag {
-	if c {
-		return f_if
-	} else {
-		return 0
-	}
-}
-
-func Open() flag {
-	return f_no_close
-}
-
-func Close() flag {
-	return f_no_open
-}
-func Text(s ...any) string {
-	var b strings.Builder
-	wrAll(&b, s, false)
-	return b.String()
 }

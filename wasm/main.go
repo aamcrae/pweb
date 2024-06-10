@@ -22,8 +22,6 @@ func main() {
 }
 
 // Add a copyright string
-func Copyright(c *Comp, owner string) {
-	if len(owner) > 0 {
-		c.Wr("<div id=\"copyright\">&nbsp; &copy; Copyright ").Wr(owner).Wr("</div>")
-	}
+func Copyright(owner string) string {
+	return Div(If(len(owner) > 0), Id("copyright"), "&nbsp; &copy; Copyright ", owner)
 }
