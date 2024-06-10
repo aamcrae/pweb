@@ -27,6 +27,12 @@ const (
 	DL_STATIC
 )
 
+const (
+	SORT_NONE = iota
+	SORT_NAME
+	SORT_DATE
+)
+
 var thumbWidth int = 160
 var thumbHeight int = 160
 var imageWidth int = 1500
@@ -141,24 +147,30 @@ func main() {
 		buildCaptions(cl, capt)
 	}
 	// If configured, sort by date.
-	var dateSort bool
+	sortKey := SORT_NONE
 	if skey, ok := conf[C_SORT]; ok {
-		if skey[0] == "date" {
-			dateSort = true
-		} else {
-			log.Fatalf("Unknown sort order: %s", skey[0])
+		switch skey[0] {
+		case "date":
+			sortKey = SORT_DATE
+		case "name":
+			sortKey = SORT_NAME
 		}
 	}
-	picts := readPicts(files, srcDir, destDir, useSelect || useRating || dateSort || len(capt) > 0)
+	picts := readPicts(files, srcDir, destDir, useSelect || useRating || (sortKey == SORT_DATE) || len(capt) > 0)
 	if useSelect || useRating {
 		picts = filterPicts(picts, ratingMap)
 	}
 	if len(capt) > 0 {
 		addCaptions(picts, capt)
 	}
-	if dateSort {
+	switch sortKey {
+	case SORT_DATE:
 		slices.SortStableFunc(picts, func(a, b *Pict) int {
 			return a.GetExif().ts.Compare(b.GetExif().ts)
+		})
+	case SORT_NAME:
+		slices.SortStableFunc(picts, func(a, b *Pict) int {
+			return strings.Compare(a.baseName, b.baseName)
 		})
 	}
 	if *verbose {
@@ -199,8 +211,6 @@ func main() {
 			download = DL_SYMLINK
 		case "static":
 			download = DL_STATIC
-		default:
-			log.Fatalf("Unknown download argument: %s", dl_arg[0])
 		}
 	}
 	_, nozip := conf[C_NOZIP]
@@ -343,9 +353,6 @@ func buildRatings(ratings []string, ratingMap map[string]struct{}, scale bool) {
 			ratingMap[r] = struct{}{}
 		}
 	} else {
-		if len(rList) > 1 {
-			log.Fatalf("Can only have one rating value")
-		}
 		// If rating scale is set, then only allow a single rating value,
 		// which is treated as a minimum rating - any ratings this rating and
 		// higher are included

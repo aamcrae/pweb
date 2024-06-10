@@ -36,6 +36,7 @@ type configOptions struct {
 	multi bool // keyword can be used multiple times
 	str   bool // Argument is a single string
 	count int  // Count of times keyword has been seen
+	allowed []string // If set, defines the allowed parameters
 }
 
 var configKeywords = map[string]*configOptions{
@@ -47,10 +48,10 @@ var configKeywords = map[string]*configOptions{
 	"style":     &configOptions{code: C_STYLE, min: 1, max: 1},
 	"after":     &configOptions{code: C_AFTER, min: 2, multi: true},
 	"before":    &configOptions{code: C_BEFORE, min: 2, multi: true},
-	"rating":    &configOptions{code: C_RATING, min: 1, max: 1},
-	"select":    &configOptions{code: C_SELECT, min: 1, max: 6},
-	"download":  &configOptions{code: C_DOWNLOAD, max: 1},
-	"nocaption": &configOptions{code: C_NOCAPTION},
+	"rating":    &configOptions{code: C_RATING, min: 1, max: 1, allowed: []string{"0", "1", "2", "3", "4", "5"}},
+	"select":    &configOptions{code: C_SELECT, min: 1, max: 6, allowed: []string{"0", "1", "2", "3", "4", "5"}},
+	"download":  &configOptions{code: C_DOWNLOAD, max: 1, allowed: []string{"", "static", "symlink"}},
+	"nocaption": &configOptions{code: C_NOCAPTION, max: 1, allowed: []string{"", "date", "name"}},
 	"sort":      &configOptions{code: C_SORT, min: 1, max: 1},
 	"reverse":   &configOptions{code: C_REVERSE},
 	"large":     &configOptions{code: C_LARGE},
@@ -82,20 +83,35 @@ func ReadConfig(f string) Config {
 		if c, ok := configKeywords[cmd[0]]; !ok {
 			log.Fatalf("%s: line %d, unknown keyword (%s)", f, i+1, cmd[0])
 		} else {
+			arg := strings.TrimLeft(cmd[1], " ")
 			if !c.multi && c.count > 0 {
-				log.Fatalf("%s: line %d, duplicate keyword (%s)", f, i+1, cmd[0])
+				log.Fatalf("%s: line %d, duplicate keyword (%s)", f, i+1, arg)
 			}
-			if len(strings.Fields(cmd[1])) < c.min {
+			flds := strings.Fields(arg)
+			if len(flds) < c.min {
 				log.Fatalf("%s: line %d, not enough arguments for '%s'", f, i, cmd[0])
 			}
-			if !c.str && !c.multi && len(strings.Fields(cmd[1])) > c.max {
+			if !c.str && !c.multi && len(flds) > c.max {
 				log.Fatalf("%s: line %d, too many arguments for '%s'", f, i, cmd[0])
 			}
-			trimmed := strings.TrimLeft(cmd[1], " ")
-			conf[c.code] = append(conf[c.code], trimmed)
+			if len(c.allowed) > 0 {
+				for _, f := range flds {
+					fnd := false
+					for _, af := range c.allowed {
+						if af == f {
+							fnd = true
+							break
+						}
+					}
+					if !fnd {
+						log.Fatalf("%s: line %d, illegal argument '%s' for %s", f, i, arg, cmd[0])
+					}
+				}
+			}
+			conf[c.code] = append(conf[c.code], arg)
 			c.count++
 			if *verbose {
-				fmt.Printf("%s: line %d, keyword %s, args=<%s>\n", f, i, cmd[0], trimmed)
+				fmt.Printf("%s: line %d, keyword %s, args=<%s>\n", f, i, cmd[0], arg)
 			}
 		}
 	}
