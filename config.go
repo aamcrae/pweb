@@ -30,12 +30,12 @@ const (
 
 // configOptions contains some options for the configuration keywords.
 type configOptions struct {
-	code  int
-	min   int  // Minimum number of arguments
-	max   int  // Maximum number of arguments
-	multi bool // keyword can be used multiple times
-	str   bool // Argument is a single string
-	count int  // Count of times keyword has been seen
+	code    int
+	min     int      // Minimum number of arguments
+	max     int      // Maximum number of arguments
+	multi   bool     // keyword can be used multiple times
+	str     bool     // Argument is a single string
+	count   int      // Count of times keyword has been seen
 	allowed []string // If set, defines the allowed parameters
 }
 

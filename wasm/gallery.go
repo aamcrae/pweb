@@ -40,7 +40,7 @@ type Gallery struct {
 	w          *h.Window
 	title      string   // Title of gallery
 	header     string   // HTML of title of page
-	back string // Referring link
+	back       string   // Referring link
 	imagePage  bool     // If set, displaying the full sized image, otherwise showing thumbnails
 	firstImage int      // The index of the first thumbnail displayed on the page
 	lastImage  int      // The index of the last thumbnail displayed on the page
@@ -76,7 +76,7 @@ func RunGallery(w *h.Window, gx []byte) {
 func newGallery(xmlData *data.Gallery, w *h.Window) *Gallery {
 	g := &Gallery{w: w,
 		title: xmlData.Title,
-		back: xmlData.Back,
+		back:  xmlData.Back,
 		owner: xmlData.Copyright,
 		tw:    xmlData.Thumb.Width,
 		th:    xmlData.Thumb.Height,
@@ -100,17 +100,17 @@ func newGallery(xmlData *data.Gallery, w *h.Window) *Gallery {
 			exposure: entry.Exposure,
 			iso:      entry.ISO,
 			flen:     entry.FocalLength}
-		img.thumbEntry = 
+		img.thumbEntry =
 			h.Div(h.Class("holder"),
 				h.Div(h.Class("slideshow"), h.Id(h.Text("slide", i)),
-				h.A(h.Onclick(h.Text("return showPict(", i, ")")),
-					h.Href("#"),
-					h.Img(h.Title(img.title), h.Src(h.Text("t/", img.filename)))),
-				h.Div(h.If(len(img.title) > 0), h.Class("thumbName"), img.title)))
+					h.A(h.Onclick(h.Text("return showPict(", i, ")")),
+						h.Href("#"),
+						h.Img(h.Title(img.title), h.Src(h.Text("t/", img.filename)))),
+					h.Div(h.If(len(img.title) > 0), h.Class("thumbName"), img.title)))
 		g.images = append(g.images, img)
 	}
 	// Install some style elements now that we know the thumbnail sizes
-	g.w.AddStyle(h.Text(".holder {width:", g.tw + 10, "px;height:", g.th + 30, "px} .thumbName{width:", g.tw + 10, "px}"))
+	g.w.AddStyle(h.Text(".holder {width:", g.tw+10, "px;height:", g.th+30, "px} .thumbName{width:", g.tw+10, "px}"))
 	return g
 }
 
@@ -189,9 +189,9 @@ func (g *Gallery) KeyPress(key string) {
 		case "ArrowDown":
 			g.SelectThumb(g.curImage + g.cols)
 		case "PageDown":
-			g.SelectThumb(g.curImage + g.rows * g.cols)
+			g.SelectThumb(g.curImage + g.rows*g.cols)
 		case "PageUp":
-			g.SelectThumb(g.curImage - g.rows * g.cols)
+			g.SelectThumb(g.curImage - g.rows*g.cols)
 		}
 	}
 }
@@ -291,9 +291,9 @@ func (g *Gallery) ShowPage() {
 // LinkToPage generates HTML for a link to a thumbnail page.
 func (g *Gallery) LinkToPage(txt string, pageNo, index int, class string) string {
 	return h.A(h.Class(class), h.Id(h.If(pageNo >= 0), h.Text("navlink", pageNo)),
-			h.Onclick(h.Text("return showThumbs(", index, ")")),
-			h.Href("#"),
-			txt)
+		h.Onclick(h.Text("return showThumbs(", index, ")")),
+		h.Href("#"),
+		txt)
 }
 
 // BuildPict creates the full page HTML for this image

@@ -41,7 +41,7 @@ func displayAlbum(w *h.Window, a *data.AlbumPage) string {
 	if len(a.Title) > 0 {
 		w.SetTitle(a.Title)
 		h1 := h.H1(a.Title)
-		
+
 		if len(a.Back) > 0 {
 			c.WriteString(h.A(h.Href(a.Back), h1))
 		} else {
