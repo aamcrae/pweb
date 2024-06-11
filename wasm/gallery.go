@@ -321,7 +321,7 @@ func (g *Gallery) BuildPict(index int) {
 	c.WriteString(g.Property("Exposure", img.exposure))
 	c.WriteString(g.Property("Aperture", img.aperture))
 	c.WriteString(g.Property("ISO", img.iso))
-	c.WriteString(g.Property("Focal length", img.flen))
+	c.WriteString(g.Property("Focal length (mm)", img.flen))
 	c.WriteString(h.Table(h.Close()))
 	c.WriteString(h.Div(h.Close()))
 	c.WriteString(Copyright(g.owner))
