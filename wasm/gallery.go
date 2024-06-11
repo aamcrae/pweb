@@ -325,6 +325,13 @@ func (g *Gallery) BuildPict(index int) {
 	c.WriteString(h.Table(h.Close()))
 	c.WriteString(h.Div(h.Close()))
 	c.WriteString(Copyright(g.owner))
+	// Add links for prefetching the next and previous images
+	if index > 0 {
+		c.WriteString(h.Link(h.Rel("prefetch"), h.Type("image/jpeg"), h.Href(g.images[index-1].filename)))
+	}
+	if index < len(g.images)-1 {
+		c.WriteString(h.Link(h.Rel("prefetch"), h.Type("image/jpeg"), h.Href(g.images[index+1].filename)))
+	}
 	img.imagePage = c.String()
 }
 
