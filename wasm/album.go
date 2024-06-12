@@ -2,18 +2,17 @@ package main
 
 import (
 	"encoding/xml"
-	"strings"
 
 	"github.com/aamcrae/pweb/data"
-	h "github.com/aamcrae/wasm"
+	html "github.com/aamcrae/wasm"
 )
 
-func RunAlbum(w *h.Window, ax []byte) {
+func RunAlbum(w *html.Window, ax []byte) {
 	w.LoadStyle("/pweb/album-style.css")
 	var album data.AlbumPage
 	err := xml.Unmarshal(ax, &album)
 	if err != nil {
-		w.Display(h.H1("Bad album data!"))
+		w.Display(new(html.HTML).H1("Bad album data!").String())
 		return
 	}
 	w.Display(displayAlbum(w, &album))
@@ -24,8 +23,8 @@ func RunAlbum(w *h.Window, ax []byte) {
 				w.Goto(album.Back)
 			}
 		})
-		w.OnSwipe(func(d h.Direction) bool {
-			if d == h.Down {
+		w.OnSwipe(func(d html.Direction) bool {
+			if d == html.Down {
 				w.Goto(album.Back)
 				return true
 			}
@@ -36,23 +35,23 @@ func RunAlbum(w *h.Window, ax []byte) {
 }
 
 // displayAlbum generates the HTML for the album from the XML data.
-func displayAlbum(w *h.Window, a *data.AlbumPage) string {
-	var c strings.Builder
+func displayAlbum(w *html.Window, a *data.AlbumPage) string {
+	h := new(html.HTML)
 	if len(a.Title) > 0 {
 		w.SetTitle(a.Title)
-		h1 := h.H1(a.Title)
+		title := h.H1(a.Title).String()
 
 		if len(a.Back) > 0 {
-			c.WriteString(h.A(h.Href(a.Back), h1))
+			h.Wr(h.A(h.Href(a.Back), title))
 		} else {
-			c.WriteString(h1)
+			h.Wr(title)
 		}
 	}
-	c.WriteString(h.Table(h.Open(), h.Summary("Album"), h.Id("albumTab")))
+	h.Wr(h.Table(h.Open(), h.Summary("Album"), h.Id("albumTab")))
 	for _, entry := range a.Albums {
-		c.WriteString(h.Tr(h.Td(h.Class("albumName"), h.A(h.Href(entry.Link), entry.Title))))
+		h.Wr(h.Tr(h.Td(h.Class("albumName"), h.A(h.Href(entry.Link), entry.Title))))
 	}
-	c.WriteString(h.Table(h.Close()))
-	c.WriteString(Copyright(a.Copyright))
-	return c.String()
+	h.Wr(h.Table(h.Close()))
+	h.Wr(Copyright(a.Copyright))
+	return h.String()
 }
