@@ -63,7 +63,7 @@ func RunGallery(w *html.Window, gx []byte) {
 	g := newGallery(&gallery, w)
 	// Add some callbacks
 	w.OnResize(g.Resize)
-	w.OnKey(g.KeyPress)
+	w.OnKey(w.Document, g.KeyPress)
 	w.OnSwipe(g.Swipe)
 	w.AddJSFunction("showPict", g.ShowPic)
 	w.AddJSFunction("showThumbs", g.ShowThumbs)

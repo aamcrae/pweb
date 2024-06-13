@@ -17,7 +17,7 @@ func RunAlbum(w *html.Window, ax []byte) {
 	}
 	w.Display(displayAlbum(w, &album))
 	if len(album.Back) > 0 {
-		w.OnKey(func(key string) {
+		w.OnKey(w.Document, func(key string) {
 			switch key {
 			case "ArrowLeft", "ArrowUp":
 				w.Goto(album.Back)

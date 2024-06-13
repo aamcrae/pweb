@@ -14,7 +14,7 @@ require (
 	github.com/thomasheller/slicecmp v0.0.0-20191029144834-595e9211ce09 // indirect
 	golang.org/x/image v0.10.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 )
 
 replace github.com/aamcrae/wasm => /home/amcrae/src/github.com/aamcrae/wasm
