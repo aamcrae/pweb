@@ -16,5 +16,3 @@ require (
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 )
-
-replace github.com/aamcrae/wasm => /home/amcrae/src/github.com/aamcrae/wasm
