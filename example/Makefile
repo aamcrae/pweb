@@ -19,7 +19,7 @@ assets: dir ${ASSETS}/pweb.wasm
 	cp ../assets/css/*  ${ASSETS}
 
 ${ASSETS}/pweb.wasm: ../wasm/*.go
-	make go # tinygo # or go
+	make tinygo # tinygo or go
 
 tinygo:
 	(cd ../wasm; tinygo build -target wasm -o ${ASSETS}/pweb.wasm)
