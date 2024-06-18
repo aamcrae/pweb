@@ -61,6 +61,8 @@ var rScaleMap = map[string][]string{
 func main() {
 	flag.Usage = usage
 	flag.Parse()
+	// Select EXIF reader
+	NewExifReader = Exiv2Reader
 	args := flag.Args()
 	var conf Config
 	if len(args) == 0 {

@@ -13,7 +13,8 @@ run: all
 	go run server.go --port=${PORT} --base=${WEB}
 
 photos: dir
-	(cd photos; pweb --assets=../../assets --base=${WEB} web)
+	(cd ..; go build)
+	(cd photos; ../../pweb --assets=../../assets --base=${WEB} web)
 
 assets: dir ${ASSETS}/pweb.wasm
 	cp ../assets/css/*  ${ASSETS}

@@ -2,13 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"os"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/kolesa-team/goexiv"
 )
 
 // date/time layouts for the EXIF date objects.
@@ -30,74 +26,43 @@ type Exif struct {
 	focal_len   string
 }
 
+type ExifReader interface {
+	Open(string) error
+	Get(...string) string
+}
+
+// Factory function for getting a new EXIF reader
+var NewExifReader func() ExifReader
+
 // ReadExif reads the file and extracts the EXIF data from the file.
-// goexiv (a cgo binding to libexiv2) is used, but sometimes it seems
-// this binding doesn't handle concurrency reliably, and will sometimes crash unexpectedly.
 func ReadExif(srcFile string) (*Exif, error) {
 	if *verbose {
 		fmt.Printf("%s: reading exif\n", srcFile)
 	}
-	var exif Exif
-	idata, err := os.ReadFile(srcFile)
-	if err != nil {
+	reader := NewExifReader()
+	if err := reader.Open(srcFile); err != nil {
 		return nil, err
 	}
-	// Read exif and extract relevant tags.
-	img, err := goexiv.OpenBytes(idata)
-	if err != nil {
-		// Assume no exif
-		log.Printf("%s: exif read (%v)", srcFile, err)
-		return &exif, nil
-	} else {
-		err := img.ReadMetadata()
-		if err != nil {
-			// Unable to parse exif
-			return nil, err
-		}
-		exif.title = getIptc(img, "Iptc.Application2.ObjectName", "Iptc.Application2.Headline")
-		exif.caption = getIptc(img, "Iptc.Application2.Caption")
-		exif.exposure = getExif(img, "Exif.Photo.ExposureTime")
-		exif.iso = getExif(img, "Exif.Photo.ISOSpeedRatings")
-		exif.fstop = rational(getExif(img, "Exif.Photo.FNumber"))
-		exif.focal_len = rational(getExif(img, "Exif.Photo.FocalLength"))
-		exif.orientation = getExif(img, "Exif.Image.Orientation")
-		date := getExif(img, "Exif.Photo.DateTimeDigitized", "Exif.Photo.DateTimeOriginal", "Exif.Image.DateTime")
-		if len(date) > 0 {
-			// The date should be in ISO 8601 format, but Canon uses ':' instead of '-'
+	var exif Exif
+	exif.title = reader.Get("Iptc.Application2.ObjectName", "Iptc.Application2.Headline")
+	exif.caption = reader.Get("Iptc.Application2.Caption")
+	exif.exposure = reader.Get("Exif.Photo.ExposureTime")
+	exif.iso = reader.Get("Exif.Photo.ISOSpeedRatings")
+	exif.fstop = rational(reader.Get("Exif.Photo.FNumber"))
+	exif.focal_len = rational(reader.Get("Exif.Photo.FocalLength"))
+	exif.orientation = reader.Get("Exif.Image.Orientation")
+	date := reader.Get("Exif.Photo.DateTimeDigitized", "Exif.Photo.DateTimeOriginal", "Exif.Image.DateTime")
+	if len(date) > 0 {
+		var err error
+		// The date should be in ISO 8601 format, but Canon uses ':' instead of '-'
+		if exif.ts, err = time.ParseInLocation(canonLayout, date, time.Local); err != nil {
 			if exif.ts, err = time.ParseInLocation(canonLayout, date, time.Local); err != nil {
-				if exif.ts, err = time.ParseInLocation(canonLayout, date, time.Local); err != nil {
-					fmt.Printf("Unable to parse date (%s): %v\n", date, err)
-				}
+				fmt.Printf("Unable to parse date (%s): %v\n", date, err)
 			}
 		}
-		xmp := img.GetXmpData()
-		if r, err := xmp.FindKey("Xmp.xmp.Rating"); err != nil || r == nil {
-			exif.rating = ""
-		} else {
-			exif.rating = r.String()
-		}
 	}
+	exif.rating = reader.Get("Xmp.xmp.Rating")
 	return &exif, nil
-}
-
-func getIptc(img *goexiv.Image, keys ...string) string {
-	idata := img.GetIptcData()
-	for _, s := range keys {
-		if v, err := idata.FindKey(s); err == nil && v != nil {
-			return v.String()
-		}
-	}
-	return ""
-}
-
-func getExif(img *goexiv.Image, keys ...string) string {
-	edata := img.GetExifData()
-	for _, s := range keys {
-		if v, err := edata.FindKey(s); err == nil && v != nil {
-			return v.String()
-		}
-	}
-	return ""
 }
 
 // Convert rational to FP
