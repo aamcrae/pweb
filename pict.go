@@ -101,7 +101,7 @@ func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) {
 	mt, _ := getMtime(destPath)
 	if mt == p.mtime && p.width > 0 && p.height > 0 {
 		if *verbose {
-			fmt.Printf("Skipping resize of %s\n", p.destFile)
+			fmt.Printf("Skipping read/decode of %s\n", p.destFile)
 		}
 		return
 	}
@@ -111,6 +111,12 @@ func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) {
 	}
 	p.width = img.Width()
 	p.height = img.Height()
+	if mt == p.mtime {
+		if *verbose {
+			fmt.Printf("Skipping resize of %s\n", p.destFile)
+		}
+		return
+	}
 	if *verbose {
 		fmt.Printf("Resizing %s from %d x %d\n", p.srcFile, img.Width(), img.Height())
 	}
