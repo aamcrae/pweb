@@ -91,25 +91,30 @@ func (p *Pict) AddToGallery(g *data.Gallery, download int) {
 // a web page size. A resizer function is provided to perform the action
 // to allow selection of different image processors.
 func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) {
-	img, err := handler(p.srcFile)
-	if err != nil {
-		log.Fatalf("%s: %v", p.srcFile, err)
+	exif := p.GetExif()
+	if exif.width != 0 && exif.height != 0 {
+		p.width = exif.width
+		p.height = exif.height
 	}
-	if *verbose {
-		fmt.Printf("Resizing %s from %d x %d\n", p.srcFile, img.Width(), img.Height())
-	}
-	p.width = img.Width()
-	p.height = img.Height()
-	// Check whether timestamp is the same
+	// Check whether timestamp is the same, and we have the original resolution
 	destPath := path.Join(p.destDir, p.destFile)
 	mt, _ := getMtime(destPath)
-	if mt == p.mtime {
+	if mt == p.mtime && p.width > 0 && p.height > 0 {
 		if *verbose {
 			fmt.Printf("Skipping resize of %s\n", p.destFile)
 		}
 		return
 	}
-	switch p.GetExif().orientation {
+	img, err := handler(p.srcFile)
+	if err != nil {
+		log.Fatalf("%s: %v", p.srcFile, err)
+	}
+	p.width = img.Width()
+	p.height = img.Height()
+	if *verbose {
+		fmt.Printf("Resizing %s from %d x %d\n", p.srcFile, img.Width(), img.Height())
+	}
+	switch exif.orientation {
 	case "8":
 		img.Rotate(Rotate90)
 	case "3":

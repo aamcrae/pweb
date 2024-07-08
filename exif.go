@@ -24,6 +24,8 @@ type Exif struct {
 	exposure    string
 	fstop       string
 	focal_len   string
+	width       int
+	height      int
 }
 
 type ExifReader interface {
@@ -51,6 +53,12 @@ func ReadExif(srcFile string) (*Exif, error) {
 	exif.fstop = rational(reader.Get("Exif.Photo.FNumber"))
 	exif.focal_len = rational(reader.Get("Exif.Photo.FocalLength"))
 	exif.orientation = reader.Get("Exif.Image.Orientation")
+	if w, err := strconv.Atoi(reader.Get("Xmp.tiff.ImageWidth")); err == nil {
+		exif.width = w
+	}
+	if h, err := strconv.Atoi(reader.Get("Xmp.tiff.ImageLength")); err == nil {
+		exif.height = h
+	}
 	date := reader.Get("Exif.Photo.DateTimeDigitized", "Exif.Photo.DateTimeOriginal", "Exif.Image.DateTime")
 	if len(date) > 0 {
 		var err error

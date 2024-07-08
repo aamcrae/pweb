@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"runtime/pprof"
 	"slices"
 	"strings"
 	"time"
@@ -46,6 +47,7 @@ var baseDir = flag.String("base", "/var/www/html/photos", "Base directory of web
 var assets = flag.String("assets", "/usr/share/pweb", "Source directory of web assets")
 var imager = flag.String("imager", "dis", "Select the image handler")
 var watchdog = flag.Int("watchdog", 120, "Timeout in seconds of watchdog")
+var cpuprofile = flag.String("cpuprofile", "", "Write CPU profile to file")
 
 // rScaleMap maps a selected rating to photo ratings that will be accepted
 // e.g a rating of '3' will select photos with a rating of '3', '4' and '5'.
@@ -61,8 +63,17 @@ var rScaleMap = map[string][]string{
 func main() {
 	flag.Usage = usage
 	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
+	}
 	// Select EXIF reader
 	NewExifReader = Exiv2Reader
+	// NewExifReader = GoexifReader
 	args := flag.Args()
 	var conf Config
 	if len(args) == 0 {
