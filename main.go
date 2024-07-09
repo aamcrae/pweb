@@ -63,6 +63,7 @@ var rScaleMap = map[string][]string{
 func main() {
 	flag.Usage = usage
 	flag.Parse()
+	log.SetFlags(0)
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
