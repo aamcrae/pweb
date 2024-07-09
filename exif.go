@@ -38,9 +38,6 @@ var NewExifReader func() ExifReader
 
 // ReadExif reads the file and extracts the EXIF data from the file.
 func ReadExif(srcFile string) (*Exif, error) {
-	if *verbose {
-		fmt.Printf("%s: reading exif\n", srcFile)
-	}
 	reader := NewExifReader()
 	if err := reader.Open(srcFile); err != nil {
 		return nil, err
@@ -70,6 +67,9 @@ func ReadExif(srcFile string) (*Exif, error) {
 		}
 	}
 	exif.rating = reader.Get("Xmp.xmp.Rating")
+	if *verbose {
+		fmt.Printf("%s: exif: %v\n", srcFile, exif)
+	}
 	return &exif, nil
 }
 

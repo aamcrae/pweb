@@ -42,24 +42,19 @@ func (r *Exiv2) Get(keys ...string) string {
 		switch b {
 		case "Iptc":
 			idata := r.img.GetIptcData()
-			if v, err := idata.FindKey(k); err == nil && v != nil {
+			if v, err := idata.FindKey(k); err == nil && v != nil && v.String() != "" {
 				return v.String()
 			}
-			return ""
 		case "Exif":
 			edata := r.img.GetExifData()
 			if v, err := edata.FindKey(k); err == nil && v != nil {
 				return v.String()
 			}
-			return ""
 		case "Xmp":
 			xmp := r.img.GetXmpData()
 			if v, err := xmp.FindKey(k); err == nil && v != nil {
 				return v.String()
 			}
-			return ""
-		default:
-			return ""
 		}
 	}
 	return ""
