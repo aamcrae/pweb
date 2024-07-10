@@ -18,12 +18,14 @@ type Worker struct {
 
 // NewWorker creates a worker pool with an optional
 // watchdog timeout. If the workers stall for the timeout period,
-// the watchdog triggers.
+// the watchdog triggers. If count and name are set, a progress bar is created.
 func NewWorker(d time.Duration, name string, count int) *Worker {
 	// Create a set of workers that listen on a channel and
 	// call a function.
 	w := &Worker{}
-	w.bar = bar.Default(int64(count), name)
+	if count != 0 && name != "" {
+		w.bar = bar.Default(int64(count), name)
+	}
 	workers := runtime.NumCPU()
 	w.ch = make(chan func(), workers)
 	if d != 0 {
@@ -47,7 +49,9 @@ func (w *Worker) Wait() {
 		close(w.dog)
 		w.dogWait.Wait()
 	}
-	w.bar.Finish()
+	if w.bar != nil {
+		w.bar.Finish()
+	}
 }
 
 // Execute a function on one of the workers.
@@ -69,7 +73,9 @@ func (w *Worker) worker() {
 			return
 		}
 		f()
-		w.bar.Add(1)
+		if w.bar != nil {
+			w.bar.Add(1)
+		}
 	}
 }
 
