@@ -4,6 +4,8 @@ import (
 	"runtime"
 	"sync"
 	"time"
+
+	bar "github.com/schollz/progressbar/v3"
 )
 
 type Worker struct {
@@ -11,24 +13,26 @@ type Worker struct {
 	wg      sync.WaitGroup
 	dog     chan struct{}
 	dogWait sync.WaitGroup
+	bar *bar.ProgressBar
 }
 
 // NewWorker creates a worker pool with an optional
 // watchdog timeout. If the workers stall for the timeout period,
 // the watchdog triggers.
-func NewWorker(d time.Duration) *Worker {
+func NewWorker(d time.Duration, name string, count int) *Worker {
 	// Create a set of workers that listen on a channel and
 	// call a function.
 	w := &Worker{}
-	count := runtime.NumCPU()
-	w.ch = make(chan func(), count)
+	w.bar = bar.Default(int64(count), name)
+	workers := runtime.NumCPU()
+	w.ch = make(chan func(), workers)
 	if d != 0 {
 		w.dog = make(chan struct{}, 10)
 		w.dogWait.Add(1)
 		go w.watchdog(d)
 	}
-	w.wg.Add(count)
-	for i := 0; i < count; i++ {
+	w.wg.Add(workers)
+	for i := 0; i < workers; i++ {
 		go w.worker()
 	}
 	return w
@@ -43,6 +47,7 @@ func (w *Worker) Wait() {
 		close(w.dog)
 		w.dogWait.Wait()
 	}
+	w.bar.Finish()
 }
 
 // Execute a function on one of the workers.
@@ -64,6 +69,7 @@ func (w *Worker) worker() {
 			return
 		}
 		f()
+		w.bar.Add(1)
 	}
 }
 

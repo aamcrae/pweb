@@ -298,7 +298,7 @@ func main() {
 func readPicts(files []string, srcDir, destDir string, readExif bool) []*Pict {
 	// Create a worker pool to read the EXIF data
 	var unratedPicts []*Pict
-	pWork := NewWorker(time.Second * time.Duration(*watchdog))
+	pWork := NewWorker(time.Second * time.Duration(*watchdog), "Reading", len(files))
 	for _, f := range files {
 		p, err := NewPict(f, srcDir, destDir)
 		if err != nil {
@@ -377,7 +377,7 @@ func buildRatings(ratings []string, ratingMap map[string]struct{}, scale bool) {
 }
 
 func resizePhotos(handler NewImage, picts []*Pict, download int) {
-	resizers := NewWorker(time.Second * time.Duration(*watchdog))
+	resizers := NewWorker(time.Second * time.Duration(*watchdog), "Resizing", len(picts))
 	defer resizers.Wait()
 	for _, p := range picts {
 		resizers.Run(func() {
