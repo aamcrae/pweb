@@ -298,7 +298,7 @@ func main() {
 func readPicts(files []string, srcDir, destDir string, readExif bool) []*Pict {
 	// Create a worker pool to read the EXIF data
 	var unratedPicts []*Pict
-	pWork := NewWorker(time.Second * time.Duration(*watchdog), "Reading", len(files))
+	pWork := NewWorker(time.Second * time.Duration(*watchdog), "Reading ", len(files))
 	for _, f := range files {
 		p, err := NewPict(f, srcDir, destDir)
 		if err != nil {
