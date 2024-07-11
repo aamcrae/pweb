@@ -43,7 +43,7 @@ func ReadExif(srcFile string) (*Exif, error) {
 		return nil, err
 	}
 	var exif Exif
-	exif.title = reader.Get("Iptc.Application2.ObjectName", "Iptc.Application2.Headline")
+	exif.title = reader.Get("Iptc.Application2.ObjectName", "Iptc.Application2.Headline", "Iptc.Application2.Caption")
 	exif.caption = reader.Get("Iptc.Application2.Caption")
 	exif.exposure = reader.Get("Exif.Photo.ExposureTime")
 	exif.iso = reader.Get("Exif.Photo.ISOSpeedRatings")

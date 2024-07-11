@@ -13,7 +13,7 @@ type Worker struct {
 	wg      sync.WaitGroup
 	dog     chan struct{}
 	dogWait sync.WaitGroup
-	bar *bar.ProgressBar
+	bar     *bar.ProgressBar
 }
 
 // NewWorker creates a worker pool with an optional
