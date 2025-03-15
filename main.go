@@ -96,7 +96,7 @@ func main() {
 	}
 	var files []string
 	if incList, ok := conf[C_INCLUDE]; !ok {
-		files = append(files, globFiles([]string{"*.jpg"})...)
+		files = append(files, globFiles([]string{"*.jpg", "*.jpeg"})...)
 	} else {
 		files = append(files, globFiles(incList)...)
 	}
