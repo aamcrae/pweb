@@ -212,6 +212,11 @@ to access the file (e.g for apache2, ```Options FollowSymLinks``` must be set fo
 If download is configured as ```static```, a copy of the image is placed into the download directory, which
 is useful if the web site is going to be copied/synced to a separate server.
 
+```pweb``` depends on a number of libraries, and there may be dependency related build issues.
+One library used is [goexiv](https://github.com/kolesa-team/goexiv), which requires a specific version
+of [libexiv2](http://www.exiv2.org/). If there are build errors with ```goexiv```, follow the
+instructions to install ```libexiv2``` v0.27.
+
 ## tinygo
 
 The WASM binary built with the standard Go compiler is quite large, over 8.5Mb.
