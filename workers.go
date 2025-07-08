@@ -67,11 +67,7 @@ func (w *Worker) Run(f func()) {
 // When the channel closes, exit.
 func (w *Worker) worker() {
 	defer w.wg.Done()
-	for {
-		f, ok := <-w.ch
-		if !ok {
-			return
-		}
+	for f := range w.ch {
 		f()
 		if w.bar != nil {
 			w.bar.Add(1)
