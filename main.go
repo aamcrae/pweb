@@ -160,7 +160,7 @@ func main() {
 	if ok {
 		buildCaptions(cl, capt)
 	}
-	// If configured, sort by date.
+	// If configured, sort by date or name. Otherwise leave pictures in the include order.
 	sortKey := SORT_NONE
 	if skey, ok := conf[C_SORT]; ok {
 		switch skey[0] {
@@ -170,7 +170,8 @@ func main() {
 			sortKey = SORT_NAME
 		}
 	}
-	picts := readPicts(files, srcDir, destDir, useSelect || useRating || (sortKey == SORT_DATE) || len(capt) > 0)
+	exifRequired := useSelect || useRating || (sortKey == SORT_DATE) || len(capt) > 0
+	picts := readPicts(files, srcDir, destDir, exifRequired)
 	if useSelect || useRating {
 		picts = filterPicts(picts, ratingMap)
 	}
@@ -271,7 +272,7 @@ func main() {
 	resizePhotos(imgHandler, picts, download)
 	// Add the images to the gallery - this is done after the
 	// resize in order to capture the original resolution dimensions, which is
-	// only know after the image is processed.
+	// only known after the image is processed.
 	for _, p := range picts {
 		p.AddToGallery(&g, download)
 	}
@@ -295,7 +296,7 @@ func main() {
 
 // readPicts will create a photo object and optionally read the EXIF (if the EXIF
 // data is required for further processing)
-func readPicts(files []string, srcDir, destDir string, readExif bool) []*Pict {
+func readPicts(files []string, srcDir, destDir string, exifRequired bool) []*Pict {
 	// Create a worker pool to read the EXIF data
 	var unratedPicts []*Pict
 	pWork := NewWorker(time.Second*time.Duration(*watchdog), "Reading ", len(files))
@@ -306,7 +307,7 @@ func readPicts(files []string, srcDir, destDir string, readExif bool) []*Pict {
 		}
 		unratedPicts = append(unratedPicts, p)
 		// Read the EXIF if required
-		if readExif {
+		if exifRequired {
 			pWork.Run(func() {
 				_ = p.GetExif()
 			})
