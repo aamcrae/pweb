@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -96,14 +97,7 @@ func ReadConfig(f string) Config {
 			}
 			if len(c.allowed) > 0 {
 				for _, f := range flds {
-					fnd := false
-					for _, af := range c.allowed {
-						if af == f {
-							fnd = true
-							break
-						}
-					}
-					if !fnd {
+					if !slices.Contains(c.allowed, f) {
 						log.Fatalf("%s: line %d, illegal argument '%s' for %s", f, i, arg, cmd[0])
 					}
 				}

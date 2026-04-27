@@ -420,6 +420,7 @@ func resizePhotos(handler NewImage, picts []*Pict, download int) {
 
 func updateZip(destDir string) {
 	cmd := exec.Command("sh", "-c", fmt.Sprintf("(cd %s; zip -FSq photos.zip *)", destDir))
+	fmt.Println("Updating downloads")
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("update zip: %v", err)
 	}

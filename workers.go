@@ -34,7 +34,7 @@ func NewWorker(d time.Duration, name string, count int) *Worker {
 		go w.watchdog(d)
 	}
 	w.wg.Add(workers)
-	for i := 0; i < workers; i++ {
+	for range workers {
 		go w.worker()
 	}
 	return w
