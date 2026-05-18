@@ -181,7 +181,7 @@ func main() {
 	switch sortKey {
 	case SORT_DATE:
 		slices.SortStableFunc(picts, func(a, b *Pict) int {
-			return a.GetExif().ts.Compare(b.GetExif().ts)
+			return a.MustExif().ts.Compare(b.MustExif().ts)
 		})
 	case SORT_NAME:
 		slices.SortStableFunc(picts, func(a, b *Pict) int {
@@ -309,7 +309,7 @@ func readPicts(files []string, srcDir, destDir string, exifRequired bool) []*Pic
 		// Read the EXIF if required
 		if exifRequired {
 			pWork.Run(func() {
-				_ = p.GetExif()
+				_ = p.MustExif()
 			})
 		}
 	}
@@ -320,7 +320,7 @@ func readPicts(files []string, srcDir, destDir string, exifRequired bool) []*Pic
 func filterPicts(inPicts []*Pict, ratingMap map[string]struct{}) []*Pict {
 	var outPicts []*Pict
 	for _, p := range inPicts {
-		rating := p.GetExif().rating
+		rating := p.MustExif().rating
 		_, ok := ratingMap[rating]
 		if !ok {
 			if *verbose {
@@ -339,7 +339,7 @@ func addCaptions(pl []*Pict, capt map[string]string) {
 			if *verbose {
 				fmt.Printf("%s: Setting title to <%s>\n", p.srcFile, c)
 			}
-			p.GetExif().title = c
+			p.MustExif().title = c
 		}
 	}
 }
@@ -382,7 +382,9 @@ func resizePhotos(handler NewImage, picts []*Pict, download int) {
 	defer resizers.Wait()
 	for _, p := range picts {
 		resizers.Run(func() {
-			p.Resize(handler, thumbWidth, thumbHeight, previewWidth, previewHeight, imageWidth, imageHeight)
+			if err := p.Resize(handler, thumbWidth, thumbHeight, previewWidth, previewHeight, imageWidth, imageHeight); err != nil {
+				log.Fatalf("%s: %v", p.srcPath, err)
+			}
 			dlPath := path.Join(p.destDir, p.dlFile)
 			switch download {
 			case DL_STATIC:

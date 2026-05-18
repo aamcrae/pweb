@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"github.com/davidbyttow/govips/v2/vips"
@@ -53,10 +52,10 @@ func (v *vipsImage) Rotate(deg RotateDegrees) error {
 	return nil
 }
 
-func (v *vipsImage) Write(destFile string, mtime time.Time, w, h, q int) {
+func (v *vipsImage) Write(destFile string, mtime time.Time, w, h, q int) error {
 	vimg, err := v.img.Copy()
 	if err != nil {
-		log.Fatalf("%s: copy: %v", destFile, err)
+		return err
 	}
 	// scale it down to fit within the width & height
 	xr := float64(w) / float64(vimg.Width())
@@ -70,16 +69,14 @@ func (v *vipsImage) Write(destFile string, mtime time.Time, w, h, q int) {
 			err = vimg.Resize(yr, vips.KernelAuto)
 		}
 		if err != nil {
-			log.Fatalf("%s: resize: %v", destFile, err)
+			return err
 		}
 	}
 	jp := vips.NewJpegExportParams()
 	jp.Quality = q
 	b, _, err := vimg.ExportJpeg(jp)
 	if err != nil {
-		log.Fatalf("%s: export: %v", destFile, err)
+		return err
 	}
-	if err := cp(b, destFile, mtime); err != nil {
-		log.Fatalf("%s: write: %v", destFile, err)
-	}
+	return cp(b, destFile, mtime)
 }

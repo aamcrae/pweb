@@ -2,7 +2,6 @@ package main
 
 import (
 	"image"
-	"log"
 	"os"
 	"time"
 
@@ -47,7 +46,7 @@ func (d *disImage) Rotate(deg RotateDegrees) error {
 	return nil
 }
 
-func (d *disImage) Write(destFile string, mtime time.Time, w, h, q int) {
+func (d *disImage) Write(destFile string, mtime time.Time, w, h, q int) error {
 	// scale it down to fit within the width & height
 	xr := float64(w) / float64(d.Width())
 	yr := float64(h) / float64(d.Height())
@@ -62,11 +61,8 @@ func (d *disImage) Write(destFile string, mtime time.Time, w, h, q int) {
 	} else {
 		img = d.img
 	}
-	err := imaging.Save(img, destFile, imaging.JPEGQuality(q))
-	if err != nil {
-		log.Fatalf("%s: save: %v", destFile, err)
+	if err := imaging.Save(img, destFile, imaging.JPEGQuality(q)); err != nil {
+		return err
 	}
-	if err := os.Chtimes(destFile, mtime, mtime); err != nil {
-		log.Fatalf("%s: chtime: %v", destFile, err)
-	}
+	return os.Chtimes(destFile, mtime, mtime)
 }

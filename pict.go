@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"path"
 	"time"
 
@@ -52,24 +51,36 @@ func NewPict(fname, srcDir, destDir string) (*Pict, error) {
 
 // GetExif returns the EXIF data for the picture, loading it from the
 // file if it is not already loaded.
-func (p *Pict) GetExif() *Exif {
+func (p *Pict) GetExif() (*Exif, error) {
 	if p.exif == nil {
 		var err error
 		if p.exif, err = ReadExif(p.srcFile); err != nil {
-			log.Fatalf("%s: exif read %v", p.srcFile, err)
+			return nil, fmt.Errorf("%s: exif read %v", p.srcFile, err)
 		}
 		if p.exif.ts.IsZero() {
 			// Use file timestamp
 			p.exif.ts = p.mtime
 		}
 	}
-	return p.exif
+	return p.exif, nil
+}
+
+// MustExif returns the EXIF data for the picture, or exits on error.
+func (p *Pict) MustExif() *Exif {
+	exif, err := p.GetExif()
+	if err != nil {
+		panic(err.Error())
+	}
+	return exif
 }
 
 // AddGallery adds this picture to the gallery XML structure.
-func (p *Pict) AddToGallery(g *data.Gallery, download int) {
+func (p *Pict) AddToGallery(g *data.Gallery, download int) error {
 	var ph data.Photo
-	exif := p.GetExif()
+	exif, err := p.GetExif()
+	if err != nil {
+		return err
+	}
 	ph.Name = p.baseName
 	ph.Filename = p.destFile
 	ph.Date = exif.ts.Format("03:04 PM Monday, 02 January 2006")
@@ -85,13 +96,17 @@ func (p *Pict) AddToGallery(g *data.Gallery, download int) {
 		ph.Download = p.dlFile
 	}
 	g.Photos = append(g.Photos, ph)
+	return nil
 }
 
 // Resize resizes this picture to a thumbnail size, a preview size, and
 // a web page size. A resizer function is provided to perform the action
 // to allow selection of different image processors.
-func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) {
-	exif := p.GetExif()
+func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) error {
+	exif, err := p.GetExif()
+	if err != nil {
+		return err
+	}
 	if exif.width != 0 && exif.height != 0 {
 		p.width = exif.width
 		p.height = exif.height
@@ -103,11 +118,11 @@ func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) {
 		if *verbose {
 			fmt.Printf("Skipping read/decode of %s\n", p.destFile)
 		}
-		return
+		return nil
 	}
 	img, err := handler(p.srcFile)
 	if err != nil {
-		log.Fatalf("%s: %v", p.srcFile, err)
+		return err
 	}
 	p.width = img.Width()
 	p.height = img.Height()
@@ -115,7 +130,7 @@ func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) {
 		if *verbose {
 			fmt.Printf("Skipping resize of %s\n", p.destFile)
 		}
-		return
+		return nil
 	}
 	if *verbose {
 		fmt.Printf("Resizing %s from %d x %d\n", p.srcFile, img.Width(), img.Height())
@@ -128,7 +143,11 @@ func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) {
 	case "6":
 		img.Rotate(Rotate270)
 	}
-	img.Write(destPath, p.mtime, iw, ih, 90)
-	img.Write(path.Join(p.destDir, p.previewFile), p.mtime, pw, ph, 80)
-	img.Write(path.Join(p.destDir, p.thumbFile), p.mtime, tw, th, 80)
+	if err := img.Write(destPath, p.mtime, iw, ih, 90); err != nil {
+		return err
+	}
+	if err := img.Write(path.Join(p.destDir, p.previewFile), p.mtime, pw, ph, 80); err != nil {
+		return err
+	}
+	return img.Write(path.Join(p.destDir, p.thumbFile), p.mtime, tw, th, 80)
 }

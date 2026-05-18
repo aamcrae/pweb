@@ -18,7 +18,7 @@ type Image interface {
 	Width() int
 	Height() int
 	Rotate(degrees RotateDegrees) error
-	Write(dest string, mtime time.Time, width, height, quality int)
+	Write(dest string, mtime time.Time, width, height, quality int) error
 }
 
 // Function to create an image using a particular processor
