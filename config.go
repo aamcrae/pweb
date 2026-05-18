@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"slices"
 	"strings"
@@ -67,11 +66,11 @@ type Config map[int][]string
 // a map. The map value is the parameters for the keyword.
 // Some keywords may have multiple entries - these are added to the
 // string slice for the keyword.
-func ReadConfig(f string) Config {
+func ReadConfig(f string) (Config, error) {
 	conf := make(Config)
 	b, err := os.ReadFile(f)
 	if err != nil {
-		log.Fatalf("%s: %v", f, err)
+		return conf, err
 	}
 	for i, l := range strings.Split(string(b), "\n") {
 		if len(l) == 0 || l[0] == '#' {
@@ -79,26 +78,26 @@ func ReadConfig(f string) Config {
 		}
 		cmd := strings.SplitN(l, ":", 2)
 		if len(cmd) != 2 {
-			log.Fatalf("%s: line %d, Illegal config", f, i+1)
+			return conf, fmt.Errorf("%s: line %d, Illegal config", f, i+1)
 		}
 		if c, ok := configKeywords[cmd[0]]; !ok {
-			log.Fatalf("%s: line %d, unknown keyword (%s)", f, i+1, cmd[0])
+			return conf, fmt.Errorf("%s: line %d, unknown keyword (%s)", f, i+1, cmd[0])
 		} else {
 			arg := strings.TrimLeft(cmd[1], " ")
 			if !c.multi && c.count > 0 {
-				log.Fatalf("%s: line %d, duplicate keyword (%s)", f, i+1, arg)
+				return conf, fmt.Errorf("%s: line %d, duplicate keyword (%s)", f, i+1, arg)
 			}
 			flds := strings.Fields(arg)
 			if len(flds) < c.min {
-				log.Fatalf("%s: line %d, not enough arguments for '%s'", f, i, cmd[0])
+				return conf, fmt.Errorf("%s: line %d, not enough arguments for '%s'", f, i, cmd[0])
 			}
 			if !c.str && !c.multi && len(flds) > c.max {
-				log.Fatalf("%s: line %d, too many arguments for '%s'", f, i, cmd[0])
+				return conf, fmt.Errorf("%s: line %d, too many arguments for '%s'", f, i, cmd[0])
 			}
 			if len(c.allowed) > 0 {
 				for _, f := range flds {
 					if !slices.Contains(c.allowed, f) {
-						log.Fatalf("%s: line %d, illegal argument '%s' for %s", f, i, arg, cmd[0])
+						return conf, fmt.Errorf("%s: line %d, illegal argument '%s' for %s", f, i, arg, cmd[0])
 					}
 				}
 			}
@@ -109,5 +108,5 @@ func ReadConfig(f string) Config {
 			}
 		}
 	}
-	return conf
+	return conf, nil
 }

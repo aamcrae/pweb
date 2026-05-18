@@ -113,7 +113,10 @@ func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) error {
 	}
 	// Check whether timestamp is the same, and we have the original resolution
 	destPath := path.Join(p.destDir, p.destFile)
-	mt, _ := getMtime(destPath)
+	mt, err := getMtime(destPath)
+	if err != nil {
+		return err
+	}
 	if mt == p.mtime && p.width > 0 && p.height > 0 {
 		if *verbose {
 			fmt.Printf("Skipping read/decode of %s\n", p.destFile)

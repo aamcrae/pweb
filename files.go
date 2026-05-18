@@ -2,41 +2,43 @@ package main
 
 import (
 	"errors"
-	"log"
+	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
-	be "github.com/thomasheller/braceexpansion"
+	"github.com/thomasheller/braceexpansion"
 )
 
 // globFiles expands the wildcard file list, and returns
 // the list of files matching the wildcards.
-func globFiles(in []string) []string {
+func globFiles(in []string) ([]string, error) {
 	var files []string
 	for _, f := range in {
 		for _, splitF := range strings.Fields(f) {
-			tree, err := be.New().Parse(splitF)
+			tree, err := braceexpansion.New().Parse(splitF)
 			if err != nil {
-				log.Fatalf("Brace expand error %s: %v", f, err)
+				return nil, err
 			}
 			for _, exp := range tree.Expand() {
 				fl, err := filepath.Glob(exp)
 				if err != nil {
-					log.Fatalf("Error in expanding %s: %v", f, err)
+					return nil, err
 				}
 				files = append(files, fl...)
 			}
 		}
 	}
-	return files
+	return files, nil
 }
 
 // Add the list of file names to an existing list, using the first
 // filename in each entry as an anchor. The list may be added
 // before the anchor, or after, depending on the argument.
-func insert(flist []string, list []string, before bool) []string {
+func insert(flist []string, list []string, before bool) ([]string, error) {
 	m := make(map[string][]string)
 	for _, il := range list {
 		iEntry := strings.Fields(il)
@@ -46,11 +48,19 @@ func insert(flist []string, list []string, before bool) []string {
 	for _, f := range flist {
 		if v, ok := m[f]; ok {
 			if before {
-				newFiles = append(newFiles, globFiles(v)...)
+				fl, err := globFiles(v)
+				if err != nil {
+					return nil, err
+				}
+				newFiles = append(newFiles, fl...)
 			}
 			newFiles = append(newFiles, f)
 			if !before {
-				newFiles = append(newFiles, globFiles(v)...)
+				fl, err := globFiles(v)
+				if err != nil {
+					return nil, err
+				}
+				newFiles = append(newFiles, fl...)
 			}
 			delete(m, f)
 		} else {
@@ -59,12 +69,9 @@ func insert(flist []string, list []string, before bool) []string {
 	}
 	// Check if any files left over.
 	if len(m) != 0 {
-		for k, _ := range m {
-			log.Printf("Could not locate %s", k)
-		}
-		log.Fatalf("Exiting")
+		return nil, fmt.Errorf("could not locate: %s", strings.Join(slices.Collect(maps.Keys(m)), " "))
 	}
-	return newFiles
+	return newFiles, nil
 }
 
 // find does a linear search of the list for the requested filename.
@@ -78,12 +85,13 @@ func find(list []string, name string) (int, bool) {
 }
 
 // makeDirs ensures that the directories passed exist, creating them if necessary.
-func makeDirs(dir ...string) {
+func makeDirs(dir ...string) error {
 	for _, d := range dir {
 		if err := os.MkdirAll(d, 0755); err != nil {
-			log.Fatalf("%s: Mkdir %v", d, err)
+			return err
 		}
 	}
+	return nil
 }
 
 // cpMaybe will copy the file if the source exists
@@ -144,10 +152,6 @@ func cp(src []byte, dst string, mtime time.Time) error {
 func getMtime(f string) (time.Time, error) {
 	if fi, err := os.Stat(f); err != nil {
 		var zeroT time.Time
-		if errors.Is(err, os.ErrNotExist) {
-			return zeroT, err
-		}
-		log.Fatalf("%s: %v", f, err)
 		return zeroT, err
 	} else {
 		return fi.ModTime(), nil

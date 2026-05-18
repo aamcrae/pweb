@@ -77,13 +77,17 @@ func main() {
 	// NewExifReader = GoexifReader
 	args := flag.Args()
 	var conf Config
+	var err error
 	if len(args) == 0 {
-		conf = ReadConfig(configDefault)
+		conf, err = ReadConfig(configDefault)
 	} else if len(args) == 1 {
-		conf = ReadConfig(args[0])
+		conf, err = ReadConfig(args[0])
 	} else {
 		flag.Usage()
 		log.Fatalf("Exiting...")
+	}
+	if err != nil {
+		log.Fatalf(err.Error())
 	}
 	d, ok := conf[C_DIR]
 	if !ok {
@@ -94,17 +98,25 @@ func main() {
 	if *verbose {
 		fmt.Printf("Directory set to %s\n", destDir)
 	}
-	var files []string
+	var files, fl []string
 	if incList, ok := conf[C_INCLUDE]; !ok {
-		files = append(files, globFiles([]string{"*.jpg", "*.jpeg"})...)
+		fl, err = globFiles([]string{"*.jpg", "*.jpeg"})
 	} else {
-		files = append(files, globFiles(incList)...)
+		fl, err = globFiles(incList)
 	}
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+	files = append(files, fl...)
 	if *verbose {
 		fmt.Printf("Include list: %v\n", files)
 	}
 	if excArg, ok := conf[C_EXCLUDE]; ok {
-		for _, ex := range globFiles(excArg) {
+		fl, err := globFiles(excArg)
+		if err != nil {
+			log.Fatalf("%s: %v", excArg, err)
+		}
+		for _, ex := range fl {
 			if ind, ok := find(files, ex); ok {
 				files = append(files[:ind], files[ind+1:]...)
 			} else {
@@ -113,10 +125,16 @@ func main() {
 		}
 	}
 	if afterList, ok := conf[C_AFTER]; ok {
-		files = insert(files, afterList, false)
+		files, err = insert(files, afterList, false)
+		if err != nil {
+			log.Fatalf("after: %v", err)
+		}
 	}
 	if beforeList, ok := conf[C_BEFORE]; ok {
-		files = insert(files, beforeList, true)
+		files, err = insert(files, beforeList, true)
+		if err != nil {
+			log.Fatalf("before: %v", err)
+		}
 	}
 	if *verbose {
 		fmt.Printf("Before ratings and sorting: %v\n", files)
@@ -217,7 +235,9 @@ func main() {
 	up, upConfigured := conf[C_UP]
 	_, reverse := conf[C_REVERSE]
 	if upConfigured {
-		UpdateAlbum(up[0], *baseDir, dir, title, reverse)
+		if err := UpdateAlbum(up[0], *baseDir, dir, title, reverse); err != nil {
+			log.Fatalf("update album: %v", err)
+		}
 	}
 	download := DL_NONE
 	if dl_arg, ok := conf[C_DOWNLOAD]; ok {

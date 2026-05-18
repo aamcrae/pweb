@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"strings"
@@ -15,7 +14,7 @@ import (
 // UpdateAlbum will read the album XML file that references this
 // gallery, and will add or update it if there is no matching entry.
 // If reverse is set, then the entry will be added at the end
-func UpdateAlbum(back, dest, dir, title string, reverse bool) {
+func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 	// Map to XML file from back href.
 	albumDir := path.Dir(path.Join(dest, dir, back))
 	album := path.Join(albumDir, data.AlbumFile)
@@ -44,7 +43,7 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) {
 					if *verbose {
 						fmt.Printf("Gallery %s already present in %s\n", dir, album)
 					}
-					return
+					return nil
 				}
 				adata.Albums[ind].Link = link
 				adata.Albums[ind].Title = title
@@ -57,13 +56,15 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) {
 		}
 	} else if errors.Is(err, os.ErrNotExist) {
 		if err := os.MkdirAll(path.Dir(album), 0755); err != nil {
-			log.Fatalf("%s: %v", album, err)
+			return err
 		}
-		log.Printf("%s: New album, please set title etc.", album)
+		fmt.Printf("%s: New album, please set title etc.", album)
 		// Preload album data from template
-		ReadXml(path.Join(*assets, data.TemplateAlbumFile), &adata)
+		if err := ReadXml(path.Join(*assets, data.TemplateAlbumFile), &adata); err != nil {
+			return err
+		}
 	} else {
-		log.Fatalf("%s: %v", album, err)
+		return err
 	}
 	if !exists {
 		newAlbum := data.Album{Link: link, Id: dir, Title: title}
@@ -76,11 +77,9 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) {
 		}
 	}
 	if newData, err := xml.MarshalIndent(&adata, "", " "); err != nil {
-		log.Fatalf("%s: Marshal %v", album, err)
+		return err
 	} else {
-		if err := os.WriteFile(album, newData, 0664); err != nil {
-			log.Fatalf("%s: Write %v", album, err)
-		}
+		return os.WriteFile(album, newData, 0664)
 	}
 }
 
