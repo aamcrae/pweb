@@ -1,16 +1,16 @@
 package main
 
 import (
-	"encoding/xml"
+	"encoding/json"
 
 	"github.com/aamcrae/pweb/data"
 	html "github.com/aamcrae/wasm"
 )
 
-func RunAlbum(w *html.Window, ax []byte) {
+func RunAlbum(w *html.Window, ajson []byte) {
 	w.LoadStyle("/pweb/album-style.css")
 	var album data.AlbumPage
-	err := xml.Unmarshal(ax, &album)
+	err := json.Unmarshal(ajson, &album)
 	if err != nil {
 		w.Display(new(html.HTML).H1("Bad album data!").String())
 		return
@@ -34,7 +34,7 @@ func RunAlbum(w *html.Window, ax []byte) {
 	w.Wait()
 }
 
-// displayAlbum generates the HTML for the album from the XML data.
+// displayAlbum generates the HTML for the album from the JSON data.
 func displayAlbum(w *html.Window, a *data.AlbumPage) string {
 	h := new(html.HTML)
 	if len(a.Title) > 0 {

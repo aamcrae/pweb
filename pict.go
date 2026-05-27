@@ -74,7 +74,7 @@ func (p *Pict) MustExif() *Exif {
 	return exif
 }
 
-// AddGallery adds this picture to the gallery XML structure.
+// AddGallery adds this picture to the gallery structure.
 func (p *Pict) AddToGallery(g *data.Gallery, download int) error {
 	var ph data.Photo
 	exif, err := p.GetExif()

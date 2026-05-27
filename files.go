@@ -152,6 +152,9 @@ func cp(src []byte, dst string, mtime time.Time) error {
 func getMtime(f string) (time.Time, error) {
 	if fi, err := os.Stat(f); err != nil {
 		var zeroT time.Time
+		if errors.Is(err, os.ErrNotExist) {
+			err = nil
+		}
 		return zeroT, err
 	} else {
 		return fi.ModTime(), nil

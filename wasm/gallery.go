@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/xml"
+	"encoding/json"
 
 	"syscall/js"
 
@@ -52,10 +52,10 @@ type Gallery struct {
 	images     []*Image // slice of images in the gallery
 }
 
-func RunGallery(w *html.Window, gx []byte) {
+func RunGallery(w *html.Window, gjson []byte) {
 	w.LoadStyle("/pweb/gallery-style.css")
 	var gallery data.Gallery
-	err := xml.Unmarshal(gx, &gallery)
+	err := json.Unmarshal(gjson, &gallery)
 	if err != nil {
 		w.Display(html.NewHTML().H1("Bad or no gallery data!").String())
 		return
@@ -71,24 +71,24 @@ func RunGallery(w *html.Window, gx []byte) {
 	w.Wait()
 }
 
-// newGallery creates a new gallery from the XML data provided.
-func newGallery(xmlData *data.Gallery, w *html.Window) *Gallery {
+// newGallery creates a new gallery from the data provided.
+func newGallery(d *data.Gallery, w *html.Window) *Gallery {
 	g := &Gallery{w: w,
-		title: xmlData.Title,
-		back:  xmlData.Back,
-		owner: xmlData.Copyright,
-		tw:    xmlData.Thumb.Width,
-		th:    xmlData.Thumb.Height,
-		pw:    xmlData.Preview.Width,
-		ph:    xmlData.Preview.Height,
-		iw:    xmlData.Image.Width,
-		ih:    xmlData.Image.Height,
+		title: d.Title,
+		back:  d.Back,
+		owner: d.Copyright,
+		tw:    d.Thumb.Width,
+		th:    d.Thumb.Height,
+		pw:    d.Preview.Width,
+		ph:    d.Preview.Height,
+		iw:    d.Image.Width,
+		ih:    d.Image.Height,
 	}
 	if g.title == "" {
 		g.title = "Gallery"
 	}
-	g.header = g.HeaderDownload(g.title, g.back, xmlData.Download)
-	for i, entry := range xmlData.Photos {
+	g.header = g.HeaderDownload(g.title, g.back, d.Download)
+	for i, entry := range d.Photos {
 		img := &Image{name: entry.Name,
 			filename: entry.Filename,
 			title:    entry.Title,

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/xml"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -263,8 +263,8 @@ func main() {
 		}
 	}
 	var g data.Gallery
-	// Preload gallery XML from template (to set copyright etc.)
-	ReadXml(path.Join(*assets, data.TemplateGalleryFile), &g)
+	// Preload gallery from template (to set copyright etc.)
+	ReadJSON(path.Join(*assets, data.TemplateGalleryFileJSON), &g)
 	g.Title = title
 	if download != DL_NONE && !nozip {
 		g.Download = path.Join("d", "photos.zip")
@@ -296,9 +296,9 @@ func main() {
 	for _, p := range picts {
 		p.AddToGallery(&g, download)
 	}
-	// Write the gallery XML file
-	gFile := path.Join(destDir, data.GalleryFile)
-	if gData, err := xml.MarshalIndent(&g, "", " "); err != nil {
+	// Write the gallery file
+	gFile := path.Join(destDir, data.GalleryFileJSON)
+	if gData, err := json.Marshal(&g); err != nil {
 		log.Fatalf("%s: Marshal %v", gFile, err)
 	} else {
 		if err := os.WriteFile(gFile, gData, 0664); err != nil {
@@ -403,7 +403,7 @@ func resizePhotos(handler NewImage, picts []*Pict, download int) {
 	for _, p := range picts {
 		resizers.Run(func() {
 			if err := p.Resize(handler, thumbWidth, thumbHeight, previewWidth, previewHeight, imageWidth, imageHeight); err != nil {
-				log.Fatalf("%s: %v", p.srcPath, err)
+				log.Fatalf("%s: resizing %v", p.srcPath, err)
 			}
 			dlPath := path.Join(p.destDir, p.dlFile)
 			switch download {
@@ -412,7 +412,7 @@ func resizePhotos(handler NewImage, picts []*Pict, download int) {
 				if st, err := os.Lstat(dlPath); err == nil {
 					if (st.Mode() & os.ModeSymlink) != 0 {
 						if err := os.Remove(dlPath); err != nil {
-							log.Fatalf("%s: %v", dlPath, err)
+							log.Fatalf("%s: remove dl static %v", dlPath, err)
 						}
 					}
 				}
@@ -425,7 +425,7 @@ func resizePhotos(handler NewImage, picts []*Pict, download int) {
 				if st, err := os.Lstat(dlPath); err == nil {
 					if (st.Mode() & os.ModeSymlink) == 0 {
 						if err := os.Remove(dlPath); err != nil {
-							log.Fatalf("%s: %v", dlPath, err)
+							log.Fatalf("%s: remove dl symlink %v", dlPath, err)
 						}
 					}
 				}

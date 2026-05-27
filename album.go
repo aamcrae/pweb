@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/xml"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -11,13 +11,13 @@ import (
 	"github.com/aamcrae/pweb/data"
 )
 
-// UpdateAlbum will read the album XML file that references this
+// UpdateAlbum will read the album JSON file that references this
 // gallery, and will add or update it if there is no matching entry.
 // If reverse is set, then the entry will be added at the end
 func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
-	// Map to XML file from back href.
+	// Map to JSON file from back href.
 	albumDir := path.Dir(path.Join(dest, dir, back))
-	album := path.Join(albumDir, data.AlbumFile)
+	album := path.Join(albumDir, data.AlbumFileJSON)
 	// Whatever happens with the album file, make sure that the album HTML is up to date.
 	cpFile(path.Join(*assets, "index.html"), path.Join(albumDir, "index.html"))
 	// The back reference (usually "../index.html") may actually refer
@@ -32,7 +32,7 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 	}
 	var adata data.AlbumPage
 	var exists bool
-	err := ReadXml(album, &adata)
+	err := ReadJSON(album, &adata)
 	if err == nil {
 		// Search for gallery in album
 		for ind, al := range adata.Albums {
@@ -60,7 +60,7 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 		}
 		fmt.Printf("%s: New album, please set title etc.", album)
 		// Preload album data from template
-		if err := ReadXml(path.Join(*assets, data.TemplateAlbumFile), &adata); err != nil {
+		if err := ReadJSON(path.Join(*assets, data.TemplateAlbumFileJSON), &adata); err != nil {
 			return err
 		}
 	} else {
@@ -76,18 +76,18 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 			adata.Albums = append([]data.Album{newAlbum}, adata.Albums...)
 		}
 	}
-	if newData, err := xml.MarshalIndent(&adata, "", " "); err != nil {
+	if newData, err := json.Marshal(&adata); err != nil {
 		return err
 	} else {
 		return os.WriteFile(album, newData, 0664)
 	}
 }
 
-// ReadXml reads the XML from the file and populates the structure passed.
-func ReadXml(file string, d any) error {
+// ReadJSON reads the JSON from the file and populates the structure passed.
+func ReadJSON(file string, d any) error {
 	if af, err := os.ReadFile(file); err != nil {
 		return err
 	} else {
-		return xml.Unmarshal(af, d)
+		return json.Unmarshal(af, d)
 	}
 }

@@ -3,7 +3,7 @@ pweb is a generator for web based photo albums. It uses a [config](example/photo
 that provides the parameters.
 
 pweb uses a web-assembly program to dynamically generate the web pages
-using XML data files as the source. There are 2 types of XML files used, album and gallery.
+using JSON data files as the source. There are 2 types of JSON files used, album and gallery.
 An album essentially points to a list of other albums and galleries, and is used
 as a navigation menu. A gallery is a collection of images presented as a set of thumbnail pages;
 separate images can be selected, viewed, downloaded etc.
@@ -60,27 +60,27 @@ A typical web site directory layout may be:
 ```
   [base directory]
     |_ index.html
-       album.xml
+       album.json
        travel
         |_ index.html
-           album.xml
+           album.json
            usa
              |_ index.html
-                gallery.xml
+                gallery.json
                   |_ t
                   |_ p
                   |_ d
            australia
              |_ index.html
-                gallery.xml
+                gallery.json
                   |_ t
                   |_ p
        family
         |_ index.html
-           album.xml
+           album.json
            birthdays
              |_ index.html
-                gallery.xml
+                gallery.json
 ...
 ```
 Each directory either contains an album or a gallery. The directory layout
@@ -93,10 +93,10 @@ and if configured, download (```d```). These directories are created or removed 
 The [index.html](assets/index.html) file is used for both albums and galleries, and is
 basically just used for loading the web assembly program.
 When a gallery is created or updated, pweb will append the new gallery to the album
-that is meant to reference the gallery, and generate the necessary gallery.xml file and
+that is meant to reference the gallery, and generate the necessary gallery.json file and
 install the ```index.html``` file to the target web page directory.
 Top level albums that reference other albums will need to be initially created (usually by copying
-and modifying an existing ```album.xml``` file).
+and modifying an existing ```album.json``` file).
 
 ## Workflow
 
@@ -164,7 +164,7 @@ The directives are:
 |---------|-----------|---------|-------------|
 | dir | directory-name | hiking/usa/yosemite | The ```dir``` keyword defines the directory where the generated web pages will be written. The directory is relative to the base web directory set in the ```pweb``` flags.|
 | title | Gallery title | Yosemite Hiking | The title that is placed on the gallery. If no title is specified, "Photo Album" is used.|
-| up | link to referring album | ../index.html | Indicates the album that is referencing this gallery. If set, the path is used to find the ```album.xml``` file that refers to this gallery, and a link is added to the album to this gallery (if none already exists). If this directive is not present, no change is made to any referring album, and no link back from this gallery is generated (this is useful to create a private or orphaned gallery, inaccessible from the main album navigation).|
+| up | link to referring album | ../index.html | Indicates the album that is referencing this gallery. If set, the path is used to find the ```album.json``` file that refers to this gallery, and a link is added to the album to this gallery (if none already exists). If this directive is not present, no change is made to any referring album, and no link back from this gallery is generated (this is useful to create a private or orphaned gallery, inaccessible from the main album navigation).|
 | include | filenames | day-{2,3}/img_2*.jpg | A list of filenames (which may be wildcards) indicating the images to be included in this gallery. Multiple ```include``` lines may be used. If no ```include``` directives are present, the default include of ```*.jpg``` is used.|
 | exclude | filenames | */img_234[5-7].jpg | A list of filenames that are to be excluded from the gallery. Multiple exclude lines are allowed.|
 | after | file filenames | img_1234.jpg other/*.jpg | Insert the list of selected files after the file specified. This allows files to be placed in a particular order.|
@@ -196,7 +196,7 @@ To install ```pweb```:
 - Build and install the program via ```go build; sudo cp pweb /usr/local/bin```
 - Copy the asset files to an appropriate location e.g
 ```
-cp assets/*.xml assets/*.html /usr/share/pweb
+cp assets/*.json assets/*.html /usr/share/pweb
 cp assets/css/* /var/www/html/pweb
 ```
 - Build and install the WASM support and binaries (optionally, tinygo can be used - see below):
@@ -204,7 +204,7 @@ cp assets/css/* /var/www/html/pweb
 (cd wasm; GOOS=js GOARCH=wasm go build -o /var/www/html/pweb/pweb.wasm)
 cp $(go env GOROOT)/misc/wasm/wasm_exec.js /var/www/html/pweb
 ```
-- The album-template.xml and gallery-template.xml files may be customised to add a copyright owner.
+- The album-template.json and gallery-template.json files may be customised to add a copyright owner.
 
 If image downloading with symlinks is configured, download links are generated as symlinks to the
 original files, and your web server must be configured to allow the following of the symlinks
@@ -220,7 +220,7 @@ instructions to install ```libexiv2``` v0.27.
 ## tinygo
 
 The WASM binary built with the standard Go compiler is quite large, over 8.5Mb.
-[Tinygo](https://tinygo.org/) can be used instead, reducing the size to under 400Kb.
+[Tinygo](https://tinygo.org/) can be used instead, reducing the size to around 500Kb.
 To build the wasm binary with tinygo:
 ```
 (cd wasm; tinygo build -target wasm -no-debug -o /var/www/html/pweb/pweb.wasm)
@@ -228,3 +228,9 @@ cp $(tinygo env TINYGOROOT)/targets/wasm_exec.js /var/www/html/pweb
 ```
 
 It is important that the appropriate ```wasm_exec.js``` file is installed for whichever compiler is used.
+
+## XML to JSON conversion
+
+Previous versions of ```pweb``` used XML files for storing the album and gallery data.
+The current version uses JSON files.
+The [xmltojson](xmltojson/main.go) converts the XML version of the files to JSON files.
