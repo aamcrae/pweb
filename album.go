@@ -76,7 +76,7 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 			adata.Albums = append([]data.Album{newAlbum}, adata.Albums...)
 		}
 	}
-	if newData, err := json.Marshal(&adata); err != nil {
+	if newData, err := json.MarshalIndent(&adata, "", " "); err != nil {
 		return err
 	} else {
 		return os.WriteFile(album, newData, 0664)

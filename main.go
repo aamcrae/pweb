@@ -298,7 +298,7 @@ func main() {
 	}
 	// Write the gallery file
 	gFile := path.Join(destDir, data.GalleryFileJSON)
-	if gData, err := json.Marshal(&g); err != nil {
+	if gData, err := json.MarshalIndent(&g, "", " "); err != nil {
 		log.Fatalf("%s: Marshal %v", gFile, err)
 	} else {
 		if err := os.WriteFile(gFile, gData, 0664); err != nil {

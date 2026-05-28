@@ -8,6 +8,8 @@
 *.so
 *.dylib
 pweb
+xmltojson/xmltojson
+jsonindent/jsonindent
 
 # Test binary, built with `go test -c`
 *.test
