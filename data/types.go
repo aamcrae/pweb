@@ -4,14 +4,20 @@ import (
 	"encoding/xml"
 )
 
-const AlbumFileXML = "album.xml"
-const AlbumFileJSON = "album.json"
-const TemplateAlbumFileXML = "album-template.xml"
-const TemplateAlbumFileJSON = "album-template.json"
-const GalleryFileXML = "gallery.xml"
-const GalleryFileJSON = "gallery.json"
-const TemplateGalleryFileXML = "gallery-template.xml"
-const TemplateGalleryFileJSON = "gallery-template.json"
+const albumFileXML = "album.xml"
+const templateAlbumFileXML = "album-template.xml"
+const galleryFileXML = "gallery.xml"
+const templateGalleryFileXML = "gallery-template.xml"
+
+const albumFileJSON = "album.json"
+const templateAlbumFileJSON = "album-template.json"
+const galleryFileJSON = "gallery.json"
+const templateGalleryFileJSON = "gallery-template.json"
+
+const AlbumFileMeta = albumFileJSON
+const GalleryFileMeta = galleryFileJSON
+const TemplateAlbumFileMeta = templateAlbumFileJSON
+const TemplateGalleryFileMeta = templateGalleryFileJSON
 
 type Album struct {
 	XMLName xml.Name `xml:"album" json:"-"`

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -11,13 +10,13 @@ import (
 	"github.com/aamcrae/pweb/data"
 )
 
-// UpdateAlbum will read the album JSON file that references this
+// UpdateAlbum will read the album metadata file that references this
 // gallery, and will add or update it if there is no matching entry.
 // If reverse is set, then the entry will be added at the end
 func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
-	// Map to JSON file from back href.
+	// Map to metadata file from back href.
 	albumDir := path.Dir(path.Join(dest, dir, back))
-	album := path.Join(albumDir, data.AlbumFileJSON)
+	album := path.Join(albumDir, data.AlbumFileMeta)
 	// Whatever happens with the album file, make sure that the album HTML is up to date.
 	cpFile(path.Join(*assets, "index.html"), path.Join(albumDir, "index.html"))
 	// The back reference (usually "../index.html") may actually refer
@@ -32,7 +31,7 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 	}
 	var adata data.AlbumPage
 	var exists bool
-	err := ReadJSON(album, &adata)
+	err := readMeta(album, &adata)
 	if err == nil {
 		// Search for gallery in album
 		for ind, al := range adata.Albums {
@@ -60,7 +59,7 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 		}
 		fmt.Printf("%s: New album, please set title etc.", album)
 		// Preload album data from template
-		if err := ReadJSON(path.Join(*assets, data.TemplateAlbumFileJSON), &adata); err != nil {
+		if err := readMeta(path.Join(*assets, data.TemplateAlbumFileMeta), &adata); err != nil {
 			return err
 		}
 	} else {
@@ -76,18 +75,5 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 			adata.Albums = append([]data.Album{newAlbum}, adata.Albums...)
 		}
 	}
-	if newData, err := json.MarshalIndent(&adata, "", " "); err != nil {
-		return err
-	} else {
-		return os.WriteFile(album, newData, 0664)
-	}
-}
-
-// ReadJSON reads the JSON from the file and populates the structure passed.
-func ReadJSON(file string, d any) error {
-	if af, err := os.ReadFile(file); err != nil {
-		return err
-	} else {
-		return json.Unmarshal(af, d)
-	}
+	return writeMeta(album, &adata)
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -264,7 +263,7 @@ func main() {
 	}
 	var g data.Gallery
 	// Preload gallery from template (to set copyright etc.)
-	ReadJSON(path.Join(*assets, data.TemplateGalleryFileJSON), &g)
+	readMeta(path.Join(*assets, data.TemplateGalleryFileMeta), &g)
 	g.Title = title
 	if download != DL_NONE && !nozip {
 		g.Download = path.Join("d", "photos.zip")
@@ -297,13 +296,9 @@ func main() {
 		p.AddToGallery(&g, download)
 	}
 	// Write the gallery file
-	gFile := path.Join(destDir, data.GalleryFileJSON)
-	if gData, err := json.MarshalIndent(&g, "", " "); err != nil {
-		log.Fatalf("%s: Marshal %v", gFile, err)
-	} else {
-		if err := os.WriteFile(gFile, gData, 0664); err != nil {
-			log.Fatalf("%s: Write %v", gFile, err)
-		}
+	gFile := path.Join(destDir, data.GalleryFileMeta)
+	if err := writeMeta(gFile, &g); err != nil {
+		log.Fatalf("%s: %v", gFile, err)
 	}
 	if download != DL_NONE && !nozip {
 		updateZip(path.Join(destDir, "d"))

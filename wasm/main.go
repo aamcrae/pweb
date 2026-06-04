@@ -8,8 +8,8 @@ import (
 func main() {
 	w := html.GetWindow()
 	// Try to concurrently load both album.xml and gallery.xml
-	f1 := w.Fetcher(data.AlbumFileJSON)
-	f2 := w.Fetcher(data.GalleryFileJSON)
+	f1 := w.Fetcher(data.AlbumFileMeta)
+	f2 := w.Fetcher(data.GalleryFileMeta)
 	aData, _ := f1.Get()
 	gData, _ := f2.Get()
 	if len(aData) > 0 {
