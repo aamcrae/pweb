@@ -277,20 +277,7 @@ func main() {
 	g.Preview.Height = previewHeight
 	g.Image.Width = imageWidth
 	g.Image.Height = imageHeight
-	var imgHandler NewImage
-	switch *imager {
-	case "vips":
-		imgHandler = func(s string) (Image, error) {
-				return NewVipsImage(s)
-			}
-		vipsInit()
-	case "dis":
-		imgHandler = func(s string) (Image, error) {
-			return NewDisImage(s)
-		}
-	default:
-		log.Fatalf("%s: Unknown imager", *imager)
-	}
+	imgHandler := selectImager(*image)
 	// Now generate the scaled images that will appear on the web site.
 	resizePhotos(imgHandler, picts, download)
 	// Add the images to the gallery - this is done after the
