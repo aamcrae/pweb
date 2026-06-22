@@ -71,9 +71,6 @@ func main() {
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
 	}
-	// Select EXIF reader
-	NewExifReader = Exiv2Reader
-	// NewExifReader = GoexifReader
 	args := flag.Args()
 	var conf Config
 	var err error

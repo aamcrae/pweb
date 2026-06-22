@@ -29,17 +29,18 @@ type Exif struct {
 }
 
 type ExifReader interface {
-	Open(string) error
 	Get(...string) string
 }
 
 // Factory function for getting a new EXIF reader
-var NewExifReader func() ExifReader
+var NewExifReader func(f string) (ExifReader, error) = func(f string) (ExifReader, error) {
+	return Exiv2Open(f)
+}
 
 // ReadExif reads the file and extracts the EXIF data from the file.
 func ReadExif(srcFile string) (*Exif, error) {
-	reader := NewExifReader()
-	if err := reader.Open(srcFile); err != nil {
+	reader, err := NewExifReader(srcFile)
+	if err != nil {
 		return nil, err
 	}
 	var exif Exif

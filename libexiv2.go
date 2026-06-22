@@ -7,36 +7,31 @@ import (
 	"github.com/kolesa-team/goexiv"
 )
 
-type Exiv2 struct {
+type exiv2 struct {
 	img *goexiv.Image
 }
 
-// Exiv2Reader creates and returns a new EXIF reader.
 // goexiv (a cgo binding to libexiv2) is used, but sometimes it seems
 // this binding doesn't handle concurrency reliably, and will sometimes crash unexpectedly.
-func Exiv2Reader() ExifReader {
-	return &Exiv2{}
-}
-
-func (r *Exiv2) Open(file string) error {
+func Exiv2Open(file string) (*exiv2, error) {
 	idata, err := os.ReadFile(file)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// Read exif and extract relevant tags.
-	if r.img, err = goexiv.OpenBytes(idata); err != nil {
-		// No exif. Allow this.
-		return err
-	}
-	err = r.img.ReadMetadata()
+	img, err := goexiv.OpenBytes(idata)
 	if err != nil {
-		// Unable to parse exif
-		return err
+		// No exif. Allow this.
+		return nil, err
 	}
-	return nil
+	if err = img.ReadMetadata(); err != nil {
+		// Unable to parse exif
+		return nil, err
+	}
+	return &exiv2{ img: img}, nil
 }
 
-func (r *Exiv2) Get(keys ...string) string {
+func (r *exiv2) Get(keys ...string) string {
 	for _, k := range keys {
 		b, _, _ := strings.Cut(k, ".")
 		switch b {
