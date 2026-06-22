@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aamcrae/pweb/data"
+	"github.com/aamcrae/pweb/shared"
 )
 
 const (
@@ -258,9 +258,9 @@ func main() {
 			log.Fatalf("Write htaccess %v", err)
 		}
 	}
-	var g data.Gallery
+	var g shared.Gallery
 	// Preload gallery from template (to set copyright etc.)
-	readMeta(path.Join(*assets, data.TemplateGalleryFileMeta), &g)
+	readMeta(path.Join(*assets, shared.TemplateGalleryFileMeta), &g)
 	g.Title = title
 	if download != DL_NONE && !nozip {
 		g.Download = path.Join("d", "photos.zip")
@@ -284,7 +284,7 @@ func main() {
 		p.AddToGallery(&g, download)
 	}
 	// Write the gallery file
-	gFile := path.Join(destDir, data.GalleryFileMeta)
+	gFile := path.Join(destDir, shared.GalleryFileMeta)
 	if err := writeMeta(gFile, &g); err != nil {
 		log.Fatalf("%s: %v", gFile, err)
 	}

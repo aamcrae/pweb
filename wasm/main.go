@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/aamcrae/pweb/data"
+	"github.com/aamcrae/pweb/shared"
 	html "github.com/aamcrae/wasm"
 )
 
 func main() {
 	w := html.GetWindow()
 	// Try to concurrently load both album.xml and gallery.xml
-	f1 := w.Fetcher(data.AlbumFileMeta)
-	f2 := w.Fetcher(data.GalleryFileMeta)
+	f1 := w.Fetcher(shared.AlbumFileMeta)
+	f2 := w.Fetcher(shared.GalleryFileMeta)
 	aData, _ := f1.Get()
 	gData, _ := f2.Get()
 	if len(aData) > 0 {

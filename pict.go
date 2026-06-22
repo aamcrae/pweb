@@ -5,7 +5,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/aamcrae/pweb/data"
+	"github.com/aamcrae/pweb/shared"
 )
 
 type Pict struct {
@@ -75,8 +75,8 @@ func (p *Pict) MustExif() *Exif {
 }
 
 // AddGallery adds this picture to the gallery structure.
-func (p *Pict) AddToGallery(g *data.Gallery, download int) error {
-	var ph data.Photo
+func (p *Pict) AddToGallery(g *shared.Gallery, download int) error {
+	var ph shared.Photo
 	exif, err := p.GetExif()
 	if err != nil {
 		return err

@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 
-	"github.com/aamcrae/pweb/data"
+	"github.com/aamcrae/pweb/shared"
 	html "github.com/aamcrae/wasm"
 )
 
 func RunAlbum(w *html.Window, ajson []byte) {
 	w.LoadStyle("/pweb/album-style.css")
-	var album data.AlbumPage
+	var album shared.AlbumPage
 	err := json.Unmarshal(ajson, &album)
 	if err != nil {
 		w.Display(new(html.HTML).H1("Bad album data!").String())
@@ -35,7 +35,7 @@ func RunAlbum(w *html.Window, ajson []byte) {
 }
 
 // displayAlbum generates the HTML for the album from the JSON data.
-func displayAlbum(w *html.Window, a *data.AlbumPage) string {
+func displayAlbum(w *html.Window, a *shared.AlbumPage) string {
 	h := new(html.HTML)
 	if len(a.Title) > 0 {
 		w.SetTitle(a.Title)

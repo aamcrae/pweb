@@ -31,7 +31,7 @@ type Exif struct {
 }
 
 type ExifReader interface {
-	Get(...string) string
+	Get(...string) string // Empty string indicates no value
 }
 
 // Factory function for getting a new EXIF reader

@@ -7,7 +7,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/aamcrae/pweb/data"
+	"github.com/aamcrae/pweb/shared"
 )
 
 // UpdateAlbum will read the album metadata file that references this
@@ -16,7 +16,7 @@ import (
 func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 	// Map to metadata file from back href.
 	albumDir := path.Dir(path.Join(dest, dir, back))
-	album := path.Join(albumDir, data.AlbumFileMeta)
+	album := path.Join(albumDir, shared.AlbumFileMeta)
 	// Whatever happens with the album file, make sure that the album HTML is up to date.
 	cpFile(path.Join(*assets, "index.html"), path.Join(albumDir, "index.html"))
 	// The back reference (usually "../index.html") may actually refer
@@ -29,7 +29,7 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 		d, ele = path.Split(path.Clean(d))
 		link = path.Join(ele, link)
 	}
-	var adata data.AlbumPage
+	var adata shared.AlbumPage
 	var exists bool
 	err := readMeta(album, &adata)
 	if err == nil {
@@ -59,20 +59,20 @@ func UpdateAlbum(back, dest, dir, title string, reverse bool) error {
 		}
 		fmt.Printf("%s: New album, please set title etc.", album)
 		// Preload album data from template
-		if err := readMeta(path.Join(*assets, data.TemplateAlbumFileMeta), &adata); err != nil {
+		if err := readMeta(path.Join(*assets, shared.TemplateAlbumFileMeta), &adata); err != nil {
 			return err
 		}
 	} else {
 		return err
 	}
 	if !exists {
-		newAlbum := data.Album{Link: link, Id: dir, Title: title}
+		newAlbum := shared.Album{Link: link, Id: dir, Title: title}
 		// Add new gallery reference either at the front (reverse false)
 		// or appended.
 		if reverse {
 			adata.Albums = append(adata.Albums, newAlbum)
 		} else {
-			adata.Albums = append([]data.Album{newAlbum}, adata.Albums...)
+			adata.Albums = append([]shared.Album{newAlbum}, adata.Albums...)
 		}
 	}
 	return writeMeta(album, &adata)

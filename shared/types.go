@@ -1,4 +1,4 @@
-package data
+package shared
 
 import (
 	"encoding/xml"

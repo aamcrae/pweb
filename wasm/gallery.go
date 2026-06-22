@@ -5,7 +5,7 @@ import (
 
 	"syscall/js"
 
-	"github.com/aamcrae/pweb/data"
+	"github.com/aamcrae/pweb/shared"
 	html "github.com/aamcrae/wasm"
 )
 
@@ -27,7 +27,7 @@ type Image struct {
 	thumbEntry string    // The HTML used to display the thumbnail
 	imagePage  string    // The HTML used to display the full sized image
 	download   string    // If set, the file for download
-	original   data.Size // The original image's resolution
+	original   shared.Size // The original image's resolution
 	exposure   string    // EXIF data
 	aperture   string
 	iso        string
@@ -54,7 +54,7 @@ type Gallery struct {
 
 func RunGallery(w *html.Window, gjson []byte) {
 	w.LoadStyle("/pweb/gallery-style.css")
-	var gallery data.Gallery
+	var gallery shared.Gallery
 	err := json.Unmarshal(gjson, &gallery)
 	if err != nil {
 		w.Display(html.NewHTML().H1("Bad or no gallery data!").String())
@@ -72,7 +72,7 @@ func RunGallery(w *html.Window, gjson []byte) {
 }
 
 // newGallery creates a new gallery from the data provided.
-func newGallery(d *data.Gallery, w *html.Window) *Gallery {
+func newGallery(d *shared.Gallery, w *html.Window) *Gallery {
 	g := &Gallery{w: w,
 		title: d.Title,
 		back:  d.Back,

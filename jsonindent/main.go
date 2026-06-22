@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/aamcrae/pweb/data"
+	"github.com/aamcrae/pweb/shared"
 )
 
 var input = flag.String("input", "", "Input JSON file")
@@ -16,11 +16,11 @@ var write = flag.Bool("write", false, "Rewrite JSON file")
 func main() {
 	flag.Parse()
 	switch filepath.Base(*input) {
-	case data.AlbumFileJSON:
-		var adata data.AlbumPage
+	case shared.AlbumFileJSON:
+		var adata shared.AlbumPage
 		read(*input, *write, &adata)
-	case data.GalleryFileJSON:
-		var gdata data.Gallery
+	case shared.GalleryFileJSON:
+		var gdata shared.Gallery
 		read(*input, *write, &gdata)
 	default:
 		log.Fatalf("Unknown JSON file: %s", *input)

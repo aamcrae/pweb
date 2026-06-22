@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/aamcrae/pweb/data"
+	"github.com/aamcrae/pweb/shared"
 )
 
 var input = flag.String("input", "", "Input XML file")
@@ -18,11 +18,11 @@ var write = flag.Bool("write", false, "Write JSON file")
 func main() {
 	flag.Parse()
 	switch filepath.Base(*input) {
-	case data.AlbumFileXML:
-		var adata data.AlbumPage
+	case shared.AlbumFileXML:
+		var adata shared.AlbumPage
 		read(*input, *write, &adata)
-	case data.GalleryFileXML:
-		var gdata data.Gallery
+	case shared.GalleryFileXML:
+		var gdata shared.Gallery
 		read(*input, *write, &gdata)
 	default:
 		log.Fatalf("Unknown XML file: %s", *input)
