@@ -1,4 +1,4 @@
-package main
+package exiv2
 
 import (
 	"os"

@@ -4,8 +4,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/aamcrae/pweb/imaging/dis"
-	"github.com/aamcrae/pweb/imaging/vips"
+	"github.com/aamcrae/pweb/plugins/dis"
+	"github.com/aamcrae/pweb/plugins/vips"
 )
 
 // Image defines the interface to an image processor for an image.

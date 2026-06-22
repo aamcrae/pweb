@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aamcrae/pweb/plugins/exiv2"
 )
 
 // date/time layouts for the EXIF date objects.
@@ -34,7 +36,7 @@ type ExifReader interface {
 
 // Factory function for getting a new EXIF reader
 var NewExifReader func(f string) (ExifReader, error) = func(f string) (ExifReader, error) {
-	return Exiv2Open(f)
+	return exiv2.Exiv2Open(f)
 }
 
 // ReadExif reads the file and extracts the EXIF data from the file.
