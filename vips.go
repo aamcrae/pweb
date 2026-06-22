@@ -12,7 +12,6 @@ import (
 // multiple images in parallel, the library will sometimes fail with
 // a SIGSEGV, or a thread will hang.
 type vipsImage struct {
-	Image
 	img *vips.ImageRef
 }
 
@@ -24,7 +23,7 @@ func vipsInit() {
 
 // NewVipsImage returns an image loaded and managed by the
 // cgo bindings to libvips.
-func NewVipsImage(src string) (Image, error) {
+func NewVipsImage(src string) (*vipsImage, error) {
 	vimg, err := vips.NewImageFromFile(src)
 	if err != nil {
 		return nil, err

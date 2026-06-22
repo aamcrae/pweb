@@ -9,11 +9,10 @@ import (
 )
 
 type disImage struct {
-	Image
 	img image.Image
 }
 
-func NewDisImage(src string) (Image, error) {
+func NewDisImage(src string) (*disImage, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, err

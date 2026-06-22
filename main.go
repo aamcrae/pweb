@@ -280,10 +280,14 @@ func main() {
 	var imgHandler NewImage
 	switch *imager {
 	case "vips":
-		imgHandler = NewVipsImage
+		imgHandler = func(s string) (Image, error) {
+				return NewVipsImage(s)
+			}
 		vipsInit()
 	case "dis":
-		imgHandler = NewDisImage
+		imgHandler = func(s string) (Image, error) {
+			return NewDisImage(s)
+		}
 	default:
 		log.Fatalf("%s: Unknown imager", *imager)
 	}
