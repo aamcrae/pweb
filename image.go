@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"time"
 
 	"github.com/aamcrae/pweb/imaging/dis"
@@ -24,7 +25,7 @@ func selectImager(name string) NewImage {
 		return func(s string) (Image, error) {
 				return vips.NewVipsImage(s)
 			}
-		vips.vipsInit()
+		vips.VipsInit()
 	case "dis":
 		return func(s string) (Image, error) {
 			return dis.NewDisImage(s)
@@ -32,4 +33,5 @@ func selectImager(name string) NewImage {
 	default:
 		log.Fatalf("%s: Unknown imager", *imager)
 	}
+	return nil
 }

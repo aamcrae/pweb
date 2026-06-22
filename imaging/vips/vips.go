@@ -17,7 +17,7 @@ type vipsImage struct {
 	img *vips.ImageRef
 }
 
-func vipsInit() {
+func VipsInit() {
 	// Make vips less noisy.
 	vips.LoggingSettings(nil, vips.LogLevelError)
 	vips.Startup(nil)

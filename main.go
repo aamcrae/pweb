@@ -277,7 +277,7 @@ func main() {
 	g.Preview.Height = previewHeight
 	g.Image.Width = imageWidth
 	g.Image.Height = imageHeight
-	imgHandler := selectImager(*image)
+	imgHandler := selectImager(*imager)
 	// Now generate the scaled images that will appear on the web site.
 	resizePhotos(imgHandler, picts, download)
 	// Add the images to the gallery - this is done after the
