@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/davidbyttow/govips/v2/vips"
@@ -39,14 +41,16 @@ func (v *vipsImage) Height() int {
 	return v.img.Height()
 }
 
-func (v *vipsImage) Rotate(deg RotateDegrees) error {
+func (v *vipsImage) Rotate(deg int) error {
 	switch deg {
-	case Rotate90:
+	case 90:
 		v.img.Rotate(vips.Angle90)
-	case Rotate180:
+	case 180:
 		v.img.Rotate(vips.Angle180)
-	case Rotate270:
+	case 270:
 		v.img.Rotate(vips.Angle270)
+	default:
+		return fmt.Errorf("unsupported rotation value (%d)", deg)
 	}
 	return nil
 }
@@ -77,5 +81,8 @@ func (v *vipsImage) Write(destFile string, mtime time.Time, w, h, q int) error {
 	if err != nil {
 		return err
 	}
-	return cp(b, destFile, mtime)
+	if err := os.WriteFile(destFile, b, 0644); err != nil {
+		return err
+	}
+	return os.Chtimes(destFile, mtime, mtime)
 }

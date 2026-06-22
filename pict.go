@@ -140,11 +140,11 @@ func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) error {
 	}
 	switch exif.orientation {
 	case "8":
-		img.Rotate(Rotate90)
+		img.Rotate(90)
 	case "3":
-		img.Rotate(Rotate180)
+		img.Rotate(180)
 	case "6":
-		img.Rotate(Rotate270)
+		img.Rotate(270)
 	}
 	if err := img.Write(destPath, p.mtime, iw, ih, 90); err != nil {
 		return err

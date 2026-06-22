@@ -4,20 +4,11 @@ import (
 	"time"
 )
 
-// Enum for rotation
-type RotateDegrees int
-
-const (
-	Rotate90 RotateDegrees = iota
-	Rotate180
-	Rotate270
-)
-
 // Image defines the interface to an image processor for an image.
 type Image interface {
 	Width() int
 	Height() int
-	Rotate(degrees RotateDegrees) error
+	Rotate(degrees int) error // Should only be 90, 180, 270
 	Write(dest string, mtime time.Time, width, height, quality int) error
 }
 

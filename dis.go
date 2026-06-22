@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"os"
 	"time"
@@ -33,14 +34,16 @@ func (d *disImage) Height() int {
 	return d.img.Bounds().Max.Y
 }
 
-func (d *disImage) Rotate(deg RotateDegrees) error {
+func (d *disImage) Rotate(deg int) error {
 	switch deg {
-	case Rotate90:
+	case 90:
 		d.img = imaging.Rotate90(d.img)
-	case Rotate180:
+	case 180:
 		d.img = imaging.Rotate180(d.img)
-	case Rotate270:
+	case 290:
 		d.img = imaging.Rotate270(d.img)
+	default:
+		return fmt.Errorf("unsupported rotation value (%d)", deg)
 	}
 	return nil
 }
