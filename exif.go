@@ -30,18 +30,9 @@ type Exif struct {
 	height      int
 }
 
-type ExifReader interface {
-	Get(...string) string // Empty string indicates no value
-}
-
-// Factory function for getting a new EXIF reader
-var NewExifReader func(f string) (ExifReader, error) = func(f string) (ExifReader, error) {
-	return exiv2.Exiv2Open(f)
-}
-
 // ReadExif reads the file and extracts the EXIF data from the file.
 func ReadExif(srcFile string) (*Exif, error) {
-	reader, err := NewExifReader(srcFile)
+	reader, err := exiv2.Exiv2Open(srcFile)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +54,7 @@ func ReadExif(srcFile string) (*Exif, error) {
 	if len(date) > 0 {
 		var err error
 		// The date should be in ISO 8601 format, but Canon uses ':' instead of '-'
-		if exif.ts, err = time.ParseInLocation(canonLayout, date, time.Local); err != nil {
+		if exif.ts, err = time.ParseInLocation(stdLayout, date, time.Local); err != nil {
 			if exif.ts, err = time.ParseInLocation(canonLayout, date, time.Local); err != nil {
 				fmt.Printf("Unable to parse date (%s): %v\n", date, err)
 			}
