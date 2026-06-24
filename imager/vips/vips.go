@@ -1,7 +1,6 @@
 package vips
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -42,16 +41,14 @@ func (v *vipsImage) Height() int {
 	return v.img.Height()
 }
 
-func (v *vipsImage) Rotate(deg int) error {
+func (v *vipsImage) Rotate(deg imager.RotateDegrees) error {
 	switch deg {
-	case 90:
+	case imager.Rotate90:
 		v.img.Rotate(vips.Angle90)
-	case 180:
+	case imager.Rotate180:
 		v.img.Rotate(vips.Angle180)
-	case 270:
+	case imager.Rotate270:
 		v.img.Rotate(vips.Angle270)
-	default:
-		return fmt.Errorf("unsupported rotation value (%d)", deg)
 	}
 	return nil
 }

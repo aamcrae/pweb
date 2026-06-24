@@ -11,6 +11,7 @@ import (
 // Function to create an image using a particular processor
 type NewImage func(src string) (imager.Image, error)
 
+// selectImage returns a factory function for managing images
 func selectImager(name string) NewImage {
 	switch name {
 	case "vips":

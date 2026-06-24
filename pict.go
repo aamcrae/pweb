@@ -5,6 +5,7 @@ import (
 	"path"
 	"time"
 
+	"github.com/aamcrae/pweb/imager"
 	"github.com/aamcrae/pweb/shared"
 )
 
@@ -140,11 +141,11 @@ func (p *Pict) Resize(handler NewImage, tw, th, pw, ph, iw, ih int) error {
 	}
 	switch exif.orientation {
 	case "8":
-		img.Rotate(90)
+		img.Rotate(imager.Rotate90)
 	case "3":
-		img.Rotate(180)
+		img.Rotate(imager.Rotate180)
 	case "6":
-		img.Rotate(270)
+		img.Rotate(imager.Rotate270)
 	}
 	if err := img.Write(destPath, p.mtime, iw, ih, 90); err != nil {
 		return err
