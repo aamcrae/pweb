@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/aamcrae/pweb/imager"
 	"github.com/disintegration/imaging"
 )
 
@@ -13,7 +14,7 @@ type disImage struct {
 	img image.Image
 }
 
-func NewDisImage(src string) (*disImage, error) {
+func NewDisImage(src string) (imager.Image, error) {
 	f, err := os.Open(src)
 	if err != nil {
 		return nil, err

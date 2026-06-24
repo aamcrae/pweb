@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/aamcrae/pweb/imager"
 	"github.com/davidbyttow/govips/v2/vips"
 )
 
@@ -25,7 +26,7 @@ func VipsInit() {
 
 // NewVipsImage returns an image loaded and managed by the
 // cgo bindings to libvips.
-func NewVipsImage(src string) (*vipsImage, error) {
+func NewVipsImage(src string) (imager.Image, error) {
 	vimg, err := vips.NewImageFromFile(src)
 	if err != nil {
 		return nil, err

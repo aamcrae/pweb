@@ -44,7 +44,7 @@ var verbose = flag.Bool("verbose", false, "Verbose output")
 var force = flag.Bool("force", false, "Force rebuild")
 var baseDir = flag.String("base", "/var/www/html/photos", "Base directory of web pages")
 var assets = flag.String("assets", "/usr/share/pweb", "Source directory of web assets")
-var imager = flag.String("imager", "dis", "Select the image handler")
+var imagerName = flag.String("imager", "dis", "Select the image handler")
 var watchdog = flag.Int("watchdog", 120, "Timeout in seconds of watchdog")
 var cpuprofile = flag.String("cpuprofile", "", "Write CPU profile to file")
 
@@ -274,7 +274,7 @@ func main() {
 	g.Preview.Height = previewHeight
 	g.Image.Width = imageWidth
 	g.Image.Height = imageHeight
-	imgHandler := selectImager(*imager)
+	imgHandler := selectImager(*imagerName)
 	// Now generate the scaled images that will appear on the web site.
 	resizePhotos(imgHandler, picts, download)
 	// Add the images to the gallery - this is done after the

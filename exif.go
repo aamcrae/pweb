@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/aamcrae/pweb/plugins/exiv2"
+	"github.com/aamcrae/pweb/exif/exiv2"
 )
 
 // date/time layouts for the EXIF date objects.

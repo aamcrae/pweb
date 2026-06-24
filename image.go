@@ -2,36 +2,24 @@ package main
 
 import (
 	"log"
-	"time"
 
-	"github.com/aamcrae/pweb/plugins/dis"
-	"github.com/aamcrae/pweb/plugins/vips"
+	"github.com/aamcrae/pweb/imager"
+	"github.com/aamcrae/pweb/imager/dis"
+	"github.com/aamcrae/pweb/imager/vips"
 )
 
-// Image defines the interface to an image processor for an image.
-type Image interface {
-	Width() int
-	Height() int
-	Rotate(degrees int) error // Should only be 90, 180, 270
-	Write(dest string, mtime time.Time, width, height, quality int) error
-}
-
 // Function to create an image using a particular processor
-type NewImage func(src string) (Image, error)
+type NewImage func(src string) (imager.Image, error)
 
 func selectImager(name string) NewImage {
-	switch *imager {
+	switch name {
 	case "vips":
-		return func(s string) (Image, error) {
-				return vips.NewVipsImage(s)
-			}
 		vips.VipsInit()
+		return vips.NewVipsImage
 	case "dis":
-		return func(s string) (Image, error) {
-			return dis.NewDisImage(s)
-		}
+		return dis.NewDisImage
 	default:
-		log.Fatalf("%s: Unknown imager", *imager)
+		log.Fatalf("%s: Unknown imager", name)
 	}
 	return nil
 }
