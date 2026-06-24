@@ -7,8 +7,10 @@ import (
 	"strings"
 )
 
+type keyword = int
+
 const (
-	C_UP = iota
+	C_UP keyword = iota
 	C_TITLE
 	C_DIR
 	C_INCLUDE
@@ -30,7 +32,7 @@ const (
 
 // configOptions contains some options for the configuration keywords.
 type configOptions struct {
-	code    int
+	code    keyword
 	min     int      // Minimum number of arguments
 	max     int      // Maximum number of arguments
 	multi   bool     // keyword can be used multiple times
