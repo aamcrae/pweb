@@ -20,15 +20,15 @@ const hSpace = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
  * Image holds the data for a single photo
  */
 type Image struct {
-	name       string    // Base filename (that may not be unique)
-	filename   string    // Unique filename that may include appended directory names
-	title      string    // Headline or title
-	date       string    // Date photo was taken
-	thumbEntry string    // The HTML used to display the thumbnail
-	imagePage  string    // The HTML used to display the full sized image
-	download   string    // If set, the file for download
+	name       string      // Base filename (that may not be unique)
+	filename   string      // Unique filename that may include appended directory names
+	title      string      // Headline or title
+	date       string      // Date photo was taken
+	thumbEntry string      // The HTML used to display the thumbnail
+	imagePage  string      // The HTML used to display the full sized image
+	download   string      // If set, the file for download
 	original   shared.Size // The original image's resolution
-	exposure   string    // EXIF data
+	exposure   string      // EXIF data
 	aperture   string
 	iso        string
 	flen       string

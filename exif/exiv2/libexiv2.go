@@ -28,7 +28,7 @@ func Exiv2Open(file string) (*exiv2, error) {
 		// Unable to parse exif
 		return nil, err
 	}
-	return &exiv2{ img: img}, nil
+	return &exiv2{img: img}, nil
 }
 
 func (r *exiv2) Get(keys ...string) string {
